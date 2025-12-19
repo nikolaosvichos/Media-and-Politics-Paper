@@ -1,0 +1,1046 @@
+% Options for packages loaded elsewhere
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+  12pt,
+  letterpaper,
+  DIV=11,
+  numbers=noendperiod]{scrartcl}
+\usepackage{xcolor}
+\usepackage[top=2.5cm,left=2.5cm,right=2.5cm,heightrounded]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{4}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+  \setmainfont[]{Latin Modern Roman}
+  \setsansfont[]{Latin Modern Roman}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+% Make \paragraph and \subparagraph free-standing
+\makeatletter
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+\makeatother
+
+
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+
+
+% definitions for citeproc citations
+\NewDocumentCommand\citeproctext{}{}
+\NewDocumentCommand\citeproc{mm}{%
+  \begingroup\def\citeproctext{#2}\cite{#1}\endgroup}
+\makeatletter
+ % allow citations to break across lines
+ \let\@cite@ofmt\@firstofone
+ % avoid brackets around text for \cite:
+ \def\@biblabel#1{}
+ \def\@cite#1#2{{#1\if@tempswa , #2\fi}}
+\makeatother
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newenvironment{CSLReferences}[2] % #1 hanging-indent, #2 entry-spacing
+ {\begin{list}{}{%
+  \setlength{\itemindent}{0pt}
+  \setlength{\leftmargin}{0pt}
+  \setlength{\parsep}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1
+   \setlength{\leftmargin}{\cslhangindent}
+   \setlength{\itemindent}{-1\cslhangindent}
+  \fi
+  % set entry spacing
+  \setlength{\itemsep}{#2\baselineskip}}}
+ {\end{list}}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+
+
+
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+
+
+ 
+
+
+\usepackage{setspace}
+\linespread{1.2}
+\usepackage{changepage}
+\usepackage{longtable}
+\usepackage{nameref}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{tabularray}
+\usepackage{float}
+\KOMAoption{captions}{tableheading}
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Coming of Age Under Trump},
+  colorlinks=true,
+  linkcolor={black},
+  filecolor={Maroon},
+  citecolor={black},
+  urlcolor={black},
+  pdfcreator={LaTeX via pandoc}}
+
+
+\title{Coming of Age Under Trump}
+\usepackage{etoolbox}
+\makeatletter
+\providecommand{\subtitle}[1]{% add subtitle to \maketitle
+  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
+}
+\makeatother
+\subtitle{The Effect of First Electoral Exposure in a Trump Election on
+Long-Term Support for Radical Right Attitudes}
+\author{Nikolaos Vichos\textsuperscript{}}
+\date{December 19, 2025}
+\begin{document}
+\maketitle
+\begin{abstract}
+\begin{spacing}{0.95}
+How do early political experiences during moments of democratic strain shape long-term support for radical-right attitudes? This paper examines whether coming of age politically in the context of the 2016 Trump election—characterized by nativist, authoritarian, and populist cues—durably alters individuals’ ideological trajectories. Using a sharp regression discontinuity design (RDD), I compare Americans whose first eligible presidential election was 2012 to those whose first eligible election was 2016, leveraging the age-based cutoff in the 2020 ANES. The regression discontinuity (RD) results reveal little evidence of the predicted effects and where, effects do appear, they run largely counter to expectations. Across most subgroups, there is no detectable shift in support for nativist, authoritarian, or populist attitudes. The few significant estimates point in the opposite direction: individuals first eligible to vote in 2016 tend to express lower, not higher, support for radical-right attitudes, particularly among Republicans and the full sample. Independents show a modest increase in authoritarianism, but this pattern is small, inconsistent, and sensitive to model specification. Taken together, the results suggest a partisan asymmetry that contradicts standard accounts of radical-right mobilization, raising the possibility that early exposure to Trump’s norm-breaking campaign may have triggered a form of resistance or retrospective distancing rather than ideological adoption. These findings provide new insight into how political generations are formed under disruptive conditions while raising broader questions about the fragility and conditionality of democratic commitments in the electorate.
+\end{spacing}
+\end{abstract}
+
+
+\pagenumbering{gobble}
+
+\newpage{}
+
+\thispagestyle{empty}
+
+\tableofcontents
+
+\newpage{}
+
+\pagenumbering{arabic}
+
+\section{\texorpdfstring{\textbf{Introduction}}{Introduction}}\label{introduction}
+
+The 2016 U.S. presidential election marked a rupture in American
+political life. Supporters chanted ``Lock her up!'' as protestors were
+forcibly removed from rallies, while not only political opponents but
+also journalists and the media were routinely framed as enemies of the
+people. For many young voters, this was their first political memory as
+adults. If early political experiences are formative, what are the
+downstream consequences of coming of age during an election defined by
+persistent attacks against the liberal democratic values protecting
+media freedom? This leads to the central question of this paper:
+
+\begin{adjustwidth}{1em}{1em}
+\emph{Does entering political life during a disruptive and polarizing election shape long-term support for liberal democratic attitudes toward media freedom?}
+\end{adjustwidth}
+
+To answer this question, I use a sharp regression discontinuity design
+(RDD) leveraging the age-based cutoff for voting eligibility in the 2012
+and 2016 presidential elections. By comparing individuals just eligible
+to vote in 2012 with those just eligible in 2016, I isolate the causal
+effect of entering the electorate during a conventional electoral
+context versus one characterized by intensified rhetoric against freedom
+of the press.
+
+\begin{quote}
+Across most subgroups, the regression discontinuity estimates show no
+evidence that first-time exposure to the 2016 election increased support
+for radical-right attitudes. Where significant effects do appear, they
+point in the opposite direction: Republicans and the full sample exhibit
+\emph{lower} levels of nativism and authoritarianism, while independents
+show only a small, non-robust increase in authoritarianism. Overall, the
+results run counter to prevailing expectations about
+impressionable-years sensitivity to radical-right cues.
+\end{quote}
+
+\subsection{Importance}\label{importance}
+
+\begin{quote}
+Understanding whether and how liberal democratic values protecting media
+freedom (hereinafter referred to as `media attitudes'), defined here as
+the combination of nativist, authoritarian, and populist attitudes,
+might take root is central to assessing the long-term resilience of
+liberal democracy. Young voters are particularly receptive to their
+political environment when they first engage with democratic
+institution; early adulthood thus exerts disproportionate influence on
+long-term political attitudes and behaviors
+(\citeproc{ref-jennings2014}{Jennings and Niemi 2014};
+\citeproc{ref-ghitza2023}{Ghitza, Gelman, and Auerbach 2023}).
+Therefore, studying how this cohort responds to periods of elite norm
+violation can offer critical insights into the conditions under which
+radical-right attitudes can emerge and an erosion of democratic
+attitudes might gain traction.
+\end{quote}
+
+This study can also contribute to understanding the `stickiness' of
+elite cues during early adulthood. Such top-down cues play a central
+role in shaping how citizens interpret political conflict, particularly
+when elites signal that violations of democratic norms are permissible
+or necessary (\citeproc{ref-druckman2024}{Druckman 2024};
+\citeproc{ref-clayton2021}{Clayton et al. 2021}). Although such cues
+influence the public broadly, their impact might be amplified among
+young adults. Their heightened sensitivity to their political context
+makes early adulthood a critical window for understanding how exposure
+to elite norm breaking may anchor long-term orientations toward
+radical-right attitudes.
+
+Finally, the importance of this study extends beyond academia: if
+exposure to norm violations during early adulthood can strengthen
+support for radical-right attitudes and weaken democratic commitments,
+the long-term costs of elite transgression may be generational as well
+as institutional. Democratic erosion might thus unfold subtly, through
+shifts in what young citizens come to view as acceptable in a democracy.
+If radical-right attitudes take root precisely when political identities
+are forming, the effects may endure long after the precipitating crisis
+has passed. This possibility raises the question of whether democracy
+can survive if its newest citizens come of age during moments of
+radical-right.
+
+\section{Literature Review}\label{literature-review}
+
+This paper draws on two strands of literature to examine how coming of
+age under a norm-breaking election may shape support for radical-right
+attitudes. The first explores how early adulthood functions as a
+sensitive period for political and civic development, with political
+attitudes and behaviors formed during this time often persisting
+throughout adulthood. Within that context, first-time electoral
+experiences play a notable role, forming durable patterns of engagement.
+Secondly, recent research on democratic backsliding highlights the
+importance of elite cues in shaping public attitudes and commitments to
+democratic norms, particularly within the Trump context. Taken together,
+these strands provide a framework for analyzing how exposure to the 2016
+Trump election may have affected the political development of young
+voters.
+
+\subsection{Early Adulthood and Future Political
+Behavior}\label{early-adulthood-and-future-political-behavior}
+
+Existing research has underscored the enduring impact of childhood and
+early adulthood on later-life outcomes: one of the main domains in which
+this is most evident is political behavior.
+
+Mannheim (\citeproc{ref-mannheim1928}{1928}) introduces the concept of
+`fresh contact,' arguing that initial encounters with political
+authority and conflict during this time help crystallize lasting
+political worldviews. Recent empirical work supports this idea.
+Neundorf, Smets, and García-Albacete (\citeproc{ref-neundorf2013}{2013})
+use German panel data to show that political interest develops most
+dynamically during adolescence and early adulthood, stabilizing around
+age 25. Similarly, Dinas (\citeproc{ref-dinas2013}{2013}), studying
+reactions to the Watergate scandal, finds that young adults adjust their
+political evaluations more flexibly than older cohorts by placing less
+weight on prior attitudes, suggesting an openness to new information.
+
+A related line of research explores how generations differ in their
+long-term political behavior based on when they came of age. Ghitza,
+Gelman, and Auerbach (\citeproc{ref-ghitza2023}{2023}) find that
+political preferences are largely shaped by events encountered between
+ages 14 and 24, and that cohort-defining moments like the Kennedy,
+Reagan, or Trump years create stable partisan divides. Longitudinal data
+confirm that political orientations established in this period often
+endure: Jennings and Niemi (\citeproc{ref-jennings2014}{2014}), drawing
+on decades of panel data, find that attitudes formed in early adulthood
+tend to persist across life, especially for individuals who engaged
+politically early on.
+
+\subsubsection{First Electoral
+Experiences}\label{first-electoral-experiences}
+
+One of the clearest applications of the formative nature of early
+adulthood lies in the act of voting for the first time. Dinas
+(\citeproc{ref-dinas2012}{2012}) finds that voting in a first election
+increases the likelihood of voting in subsequent elections, even decades
+later. This finding is echoed by Franklin
+(\citeproc{ref-franklin2004}{2004}) , who argues that the overall
+`salience' of a young person's first election (whether it begins with a
+high- or low-turnout context) leaves a footprint in their participation
+trajectory. These findings reinforce the idea that initial political
+experiences, like exposure to and participation in salient elections,
+become reference points that influence later engagement.
+
+Taken together, this literature positions early adulthood as a formative
+and fragile window, where social contexts and political experience leave
+lasting marks on civic behavior. Nevertheless, less is known about how
+this sensitivity interacts with moments of democratic crisis,
+particularly those marked by surges in nativist, authoritarian, and
+populist rhetoric. This paper contributes to this literature by
+examining whether coming of age during a period marked by institutional
+conflict and democratic norm erosion shapes long-term support for
+radical right attitudes. In doing so, it connects theories of
+developmental susceptibility with contemporary concerns about democratic
+backsliding and elite norm violation.
+
+\subsection{Trump 2016 and the Trickling-Down of Radical-Right
+Attitudes}\label{trump-2016-and-the-trickling-down-of-radical-right-attitudes}
+
+The 2016 U.S. presidential election marked an important rupture, both in
+tone and behavior, that distinguished it sharply from previous
+elections. In addition to being ``one of the most polarizing elections
+in U.S. history'', pitting two extremely ideologically opposed
+candidates, the 2016 election also stands out particularly due to
+candidacy of Donald Trump (\citeproc{ref-bekafigo2019}{Bekafigo et al.
+2019}).
+
+\subsubsection{A radical-right
+candidacy?}\label{a-radical-right-candidacy}
+
+Trump's campaign style was in many ways unprecedented. His political
+strategy heavily depended on activating deep-rooted anxieties: rather
+than tempering the Party's message to appeal to broader electorates,
+Trump positioned himself against both party elites and marginalized
+groups, embracing anti-immigration rhetoric and rejecting political
+correctness.
+
+\begin{quote}
+Most importantly for the purposes of this paper, his campaign was
+characterized by a stark presence of nativist, authoritarian, and
+populist ideology. Existing work by Cremer
+(\citeproc{ref-cremer2023}{2023}) highlights this, detailing how Trump's
+campaign combined these three elements, as exemplified through slogans
+such as ``build the wall'' or ``drain the swamp''. Interestingly, these
+ideological features were also present on the demand-side: Knuckey and
+Hassan (\citeproc{ref-knuckey2022}{2022}) find that authoritarian
+predispositions were powerful predictors of white vote choice in 2016.
+Authoritarianism exerted a stronger influence in the 2016 presidential
+than in any prior election, including the 2016 House election,
+suggesting that Trump's campaign style served as a triggering mechanism.
+\end{quote}
+
+\subsubsection{Elite cues and anti-democratic
+attitudes}\label{elite-cues-and-anti-democratic-attitudes}
+
+While the 2016 election marked a clear breach in elite behavior, the
+broader effects of this rupture also depend on how citizens respond.
+Findings from the literature on democratic erosion suggest that elite
+norm violations can destabilize democratic institutions. Citizens rarely
+act as the first movers in democratic erosion; they respond to elite
+behaviors, internalizing their cues about what is politically
+permissible or necessary.
+
+Druckman (\citeproc{ref-druckman2024}{2024}) offers a comprehensive
+framework for understanding how democratic backsliding unfolds through
+the interaction of elites, societal actors, and citizens. Elites are
+uniquely positioned to violate laws and norms, often under the guise of
+defending democracy itself, while also making decisions with an eye
+toward how the public will respond. Thus, in Druckman's view, citizens
+function as latent legitimators, responding to elite behavior and
+helping either to normalize or resist democratic erosion. Similarly,
+Clayton et al. (\citeproc{ref-clayton2021}{2021}) use a panel survey
+experiment to examine the effect of exposure to Trump's statements
+questioning the results of the 2020 presidential election. Their finding
+that exposure to these statements eroded trust in the election's
+legitimacy and decreased confidence in elections among his supporters
+broadly suggest that anti-democratic elite cues can `trickle-down,'
+impacting public attitudes toward democratic norms.
+
+This study builds on these insights by asking how the 2016 shift in
+elite rhetoric affected young voters who came of age during this period.
+While existing work documents the democratic consequences of Trump's
+presidency, less is known about how exposure to this political moment
+shaped long-term political development. This paper addresses that gap by
+examining whether coming of age under Trump altered long-term
+radical-right attitudes.
+
+\subsection{Theory and Hypotheses}\label{theory-and-hypotheses}
+
+Building on these insights, this section introduces this paper's
+theoretical framework and hypotheses. It outlines how early political
+socialization, partisan sensitivity, and the ideologically asymmetric
+effects of political context shape long-term liberal democratic
+attitudes.
+
+\subsubsection{H1: First-Time
+Sensitivity}\label{h1-first-time-sensitivity}
+
+Clearly, early adulthood is politically formative: experiences during
+this period can leave long-lasting marks on political behavior. This
+paper applies this logic to the context of the 2016 presidential
+election; unlike earlier cohorts, first-time voters in 2016 `came of
+age' politically during a time characterized by norm-breaking elite
+rhetoric, defined by the presence of nativist, authoritarian, and
+populist features. Given the norm-eroding context, I argue that the
+process of attitude formation becomes distorted at the moment it is most
+sticky.
+
+This leads to the central claim tested in this study, reflecting both
+the sensitivity of early political experiences and the unique nature of
+the 2016 election:\footnote{``Positive effect'' refers to an increase in
+  support}
+
+\begin{adjustwidth}{1em}{1em}
+\emph{H1: Being a first-time voter in the 2016 election will have a positive effect on long-term support for radical-right attitudes ('first-time sensitivity' hypothesis).}
+\end{adjustwidth}
+
+\subsubsection{H2: Non-Partisan
+Insensitivity}\label{h2-non-partisan-insensitivity}
+
+A growing body of research suggests that political partisanship shapes
+how individuals interpret and respond to their political environment.
+Whereas partisan identifiers, especially strong ones, tend to be more
+psychologically and behaviorally sensitive to political stimuli,
+self-identified independents are generally less responsive.
+
+Mandel and Omorogbe (\citeproc{ref-mandel2014}{2014}) find that
+partisans report higher life satisfaction under favorable political
+conditions and lower satisfaction under unfavorable ones, while
+independents express intermediate levels. This `favorability effect'
+suggests that partisans are more emotionally attuned to political
+developments whereas independents are less susceptible to affective
+spillover from the political context. In terms of political behavior,
+Magleby, Nelson, and Westlye (\citeproc{ref-magleby2011}{2011}) find
+that independents vote at significantly lower rates than partisans. This
+turnout gap---nearly 20 percentage points in the 2008
+election---suggests lower overall political involvement.
+
+These findings suggest that independents are less likely to internalize
+elite cues associated with polarized political contexts and thus may
+have been less susceptible to the cues of the 2016 Trump campaign. This
+leads to my second hypothesis:
+
+\begin{adjustwidth}{1em}{1em}
+\emph{H2: The effect will be stronger among partisans (Republicans or Democrats) than among independents ('non-partisan insensitivity' hypothesis).}
+\end{adjustwidth}
+
+\subsubsection{H3: Asymmetric
+Sensitivity}\label{h3-asymmetric-sensitivity}
+
+My final hypothesis builds on the ``asymmetric sensitivity'' hypothesis
+proposed Mandel and Omorogbe (\citeproc{ref-mandel2014}{2014}), positing
+that Republicans are more affectively responsive to their political
+environment than Democrats: their retrospective and prospective
+well-being was more strongly conditioned by whether the political
+environment was favorable or not. Democrats, by contrast, were less
+reactive.
+
+This pattern is consistent with research showing that conservatives are
+more likely to attend to, and be affected by, affectively charged or
+threatening information. For example, Joel, Burton, and Plaks
+(\citeproc{ref-joel2014}{2014}) find that conservatives not only
+anticipate stronger emotional reactions to negative outcomes but also
+report experiencing them more intensely.
+
+These findings, in addition to the fact that the radical-right elite
+cues came primarily from the Republican side imply that Republican
+first-time voters may have been more deeply affected by the political
+context of 2016 and, rather than resisting Trump's radical-right cues,
+they may have internalized them as acceptable
+(\citeproc{ref-cremer2023}{Cremer 2023};
+\citeproc{ref-knuckey2022}{Knuckey and Hassan 2022}) . This leads to my
+final hypothesis:
+
+\begin{adjustwidth}{1em}{1em}
+\emph{H3: Among partisans, the effect will be stronger among Republicans ('asymmetric sensitivity' hypothesis).}
+\end{adjustwidth}
+
+\section{Research Design}\label{research-design}
+
+This study uses a sharp RDD to identify the long-term causal impact of
+being first eligible to vote during a `conventional' versus
+`unconventional' period and political environment on voters'
+radical-right attitudes. The core idea is that young people who were
+just old enough to vote in the 2012 U.S. presidential election (i.e.,
+age 18 by November 2012) experienced a fundamentally different initial
+political environment than those who were just too young. While the
+former `came of age' politically during the 2012 election between Barack
+Obama and Mitt Romney, the latter were first eligible to vote in 2016,
+during the Trump era.
+
+This design translates into a cutoff at age 26 in 2020 (the year for
+which data is used): respondents who were 26 or older in 2020 were just
+old enough to vote in 2012, while those under 26 were not. The
+assumption underlying the RDD is that, within a narrow bandwidth around
+this cutoff, the `treatment' (being born after November 6, 2012) is
+as-good-as-randomly assigned. The local comparison around the threshold
+thus simulates an experiment where this `treatment' is assigned by birth
+timing. For more details on the research design, including the specific
+regression formula and index construction, please refer to the
+\href{https://github.com/nikolaosvichos/Online-Appendix-Coming-of-Age-Under-Trump}{online
+appendix.}
+
+\subsection{Data and Index
+Construction}\label{data-and-index-construction}
+
+The analysis draws on the 2020 American National Election Studies
+(\citeproc{ref-anes}{ANES 2021}) cross-sectional survey, which offers a
+large, nationally representative sample and includes a relatively broad
+set of items on radical-right attitudes.
+
+To capture individual-level support for radical-right attitudes, I
+constructed three indices, using a total of 28 items: nativism (6),
+authoritarianism (9), populism (13). For each core feature, I first
+assessed the internal consistency of these items\footnote{Even though
+  the authoritarian and populist items each captured a coherent
+  underlying construct (Cronbach's α \textgreater{} 0.7), the nativist
+  items were just below the commonly accepted threshold, at 0.67,
+  raising doubts about the internal consistency of the index and
+  potentially explaining some of the irregularities in the results
+  (\citeproc{ref-taber2018}{Taber 2018})}, used factor analysis to
+extract a single latent factor and rescaled the factor scores to a 0--1
+range, where higher values indicate stronger support for radical-right
+values.
+
+\subsection{Analysis}\label{analysis}
+
+My analysis is organized around running separate regressions for
+different subgroups to test the three hypotheses:
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.2520}}
+  >{\centering\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.7480}}@{}}
+\caption{Specific sub-dataset used for each hypothesis}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Hypothesis
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Subgroup
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Hypothesis
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Subgroup
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+H1
+
+(first-time sensitivity) & Full dataset \\
+H2
+
+(non-partisan insensitivity) & Two sub-datasets: partisans
+(self-identified Democrats and Republicans), and independents \\
+H3
+
+(asymmetric sensitivity) & Two sub-datasets: Democrats and
+Republicans \\
+\end{longtable}
+
+I thus expect the causal effect to be stronger for (i) partisans than
+independents and (ii) Republicans than Democrats. For each subgroup and
+each index, I estimated two model specifications:
+
+\begin{longtable}[]{@{}cc@{}}
+\caption{Model specifications}\tabularnewline
+\toprule\noalign{}
+Hypothesis & Subgroup \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Hypothesis & Subgroup \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Simple Model & No controls \\
+Control Model & Gender, education, and income as control variables. \\
+\end{longtable}
+
+\section{Results}\label{results}
+
+This section presents the findings of this paper. I begin by providing
+some example-visualizations of the discontinuity near the 26-year-old
+threshold for the full sample and for the Republican
+subgroup.\footnote{The running variable (age) axis (horizontal) in these
+  visualizations was narrowed down to an 18-60 years range (rather than
+  the original 18-60 years) for a clearer depiction. Because of the high
+  number of discontinuity visualizations (15) and their general lack of
+  visual clarity, I only present the full sample and the Republican
+  subgroup as examples. For all 15 visualizations, please refer to the
+  \href{https://github.com/nikolaosvichos/Online-Appendix-Coming-of-Age-Under-Trump}{online
+  appendix.}} I then present the results, analyzing them by hypothesis.
+
+\subsection{Discontinuities}\label{discontinuities}
+
+Figure~\ref{fig-discontinuityplot-full} visualizes the discontinuity in
+at the threshold for the full-sample. Upon visual inspection, is no
+clear discontinuity for none of the three outcomes, and the overall
+clutter of the scatterplot makes it difficult to discern any patterns.
+Though there does appear to be a slight discontinuity in nativism, the
+confidence intervals (CIs) are largely overlapping.
+
+\begin{figure}[H]
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{Vichos_MediaPaper_files/figure-pdf/fig-discontinuityplot-full-1.pdf}}
+
+}
+
+\caption{\label{fig-discontinuityplot-full}Discontinuity in Media
+Attitudes at Age 26 (Full Sample, First Degree Polynomial)}
+
+\end{figure}%
+
+Figure~\ref{fig-discontinuityplot-republicans} shows the discontinuity
+at the threshold for the Republican subgroup. In this case, there does
+appear to be a discontinuity in authoritarianism and populism attitudes
+when crossing the 26-year threshold (though CIs slightly overlap).
+Interestingly, it appears that crossing the threshold has a positive
+effect on support for these attitudes. This suggests an opposite effect
+to that predicted originally: `coming of age' politically under Trump
+leads to lower support for authoritarianism and populism among
+Republicans.
+
+\begin{figure}[H]
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{Vichos_MediaPaper_files/figure-pdf/fig-discontinuityplot-republicans-1.pdf}}
+
+}
+
+\caption{\label{fig-discontinuityplot-republicans}Discontinuity in Media
+Attitudes at Age 26 (Republican Subgroup, First Degree Polynomial)}
+
+\end{figure}%
+
+\subsection{RDD Results}\label{rdd-results}
+
+The results are visualized in Figure~\ref{fig-coefplot-results}. The
+points represent the estimated causal effect at the cutoff, and the
+horizontal lines show the associated 95\% CIs.
+
+\begin{figure}[H]
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{Vichos_MediaPaper_files/figure-pdf/fig-coefplot-results-1.pdf}}
+
+}
+
+\caption{\label{fig-coefplot-results}Coefficient plot for Nativism
+showing estimated effects and confidence intervals.}
+
+\end{figure}%
+
+The results, summarized below, are quite perplexing.\footnote{The
+  direction of the results should be interpreted in accordance with the
+  wording of the first-time sensitivity hypothesis: a positive effect
+  means an increase in nativist, authoritarian, or populist attitudes
+  among those who voted for the first time in 2016.
+
+  However, in reality, these results have been inverted. This is because
+  of the rdrobust R package (\citeproc{ref-calonico2025}{Calonico,
+  Cattaneo, and Farrell 2025}). In the package, the threshold is
+  ``crossed'' from left to right---hence, normally, a positive effect
+  would suggest an increase in nativist, authoritarian, or populist
+  attitudes among those who voted for the first time in \emph{2012.}
+  However, for clearer comprehension, the results have been reversed,
+  and the would indices indicate \emph{decreasing} support for each of
+  the three ideological features. For more details on index
+  construction, please refer to the online appendix.
+
+  Due to the perplexing nature of these results, I ran a number of
+  `rule-of-thumb' tests to confirm that the direction of the index is
+  the intended one, such as checking if it is negatively or positively
+  correlated with items used in its construction or other variables that
+  we would expect to be correlated with the outcomes in a specific way
+  (for example, higher education levels correlated with lower support
+  for authoritarianism). These tests confirmed that the direction of the
+  indices is the intended one.} Across most-subgroups, results are
+statistically insignificant. The only exceptions are nativism for the
+full sample (only for the model without controls) and authoritarianism
+for the Republican and independent subgroups (only for the model without
+controls for among independents). Support for authoritarianism increased
+among independents; however there was no statistically signficant
+increase among partisans. The two other findings are even more
+surprising, however, suggesting the exact opposite from what predicted:
+both Republicans and the entire sample of respondents who voted for the
+first time in 2016 are \emph{less} authoritarian or nativist.
+
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.1088}}
+  >{\centering\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.8912}}@{}}
+\caption{Summary of RD results}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Hypothesis
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Reject the Null?
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\centering
+Hypothesis
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+Reject the Null?
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\begin{minipage}[t]{\linewidth}\centering
+H1
+
+(first-time sensitivity)\\
+\strut
+\end{minipage} & \begin{minipage}[t]{\linewidth}\centering
+\emph{No.} The only significant result is a negative effect in support
+for nativist attitudes, which contradicts H1's prediction. Additionally,
+the result is not robust to the inclusion of controls.\\
+\strut
+\end{minipage} \\
+\begin{minipage}[t]{\linewidth}\centering
+H2
+
+(non-partisan insensitivity)\\
+\strut
+\end{minipage} & \begin{minipage}[t]{\linewidth}\centering
+\emph{No.} The only significant result is that independents who voted
+for the first time in 2016 were \emph{more} authoritarian, which
+contradicts H2's prediction of a stronger effect among partisans.
+Additionally, the result is not robust to the inclusion of controls\\
+\strut
+\end{minipage} \\
+H3
+
+(asymmetric sensitivity) & \emph{No.} The only significant result is
+that Republicans who voted for the first time in 2016 were \emph{less}
+authoritarian, which contradicts H3's prediction, despite suggesting
+some sort of asymmetric insensitivity. \\
+\end{longtable}
+
+\section{Conclusion and Discussion}\label{conclusion-and-discussion}
+
+This paper set out to examine whether the timing of democratic
+initiation---specifically, becoming a first-time voter during the 2016
+U.S. presidential election---shapes long-term support for radical-right
+attitudes. Drawing on theories of political socialization, elite
+cue-taking, and asymmetric partisan sensitivity, I tested whether
+`coming of age' politically in a moment of nativist, authoritarian, and
+populist elite rhetoric would leave a measurable imprint on voter
+attitudes.
+
+The findings are perplexingly counter-intuitive. First, independents
+voting for the first time in 2016 indicated \emph{stronger} support for
+authoritarianism than partisans, contradicting existing work suggesting
+that independents are less sensitive to their political context. Even
+more surprisingly, `coming of age' during the norm-questioning 2016
+election led to \emph{weaker} long-term support for radical-right
+attitudes (nativism and authoritarianism) among Republicans and the
+entire sample of respondents. This pattern is especially pronounced
+among Republicans, suggesting a partisan asymmetry, albeit one in the
+reverse direction of what was hypothesized. Rather than strengthening
+support for radical-right attitudes, the experience of 2016 appears to
+have either had no effect or to have even weakened support among some
+groups. These findings have important implications on our understanding
+of political socialization and the stickiness and adoption of elite
+cues. At first, they might suggest that first-time voters are resistant
+to the trickle-down adoption of radical-right attitudes; in fact, they
+might even turn against them even more strongly.
+
+However, given the broader context of existing literature, these
+counter-intuitive findings might also admit at least two darker
+interpretations. First, as Graham and Svolik
+(\citeproc{ref-graham2020}{2020}) argue, ordinary citizens often express
+broad opposition to (often undemocratic or illiberal) radical-right
+attitudes when asked in the abstract, but this support may evaporate
+when those principles conflict with partisan interests. Because the ANES
+items used here were not embedded in a tradeoff or priming design, they
+likely captured only nominal or superficial attitudes. A second
+possibility, again drawing from Graham and Svolik
+(\citeproc{ref-graham2020}{2020}), is that some Trump supporters may
+genuinely reject his radical-right rhetoric, yet continue to support him
+on policy grounds, thus generating a form of `retrospective backlash':
+weaker radical-right attitudes despite (or, in the case of the
+retrospective backlash, because of) exposure to such cues. In either
+case, the implications are troubling. Whether due to shallow commitments
+or conditional tolerance, these findings underscore a fragility in the
+public's attachment to liberal democracy that that may not withstand
+more explicit norm violation.
+
+That said, several limitations temper the interpretation of these
+results. Most notably, while some effects are statistically significant
+and robust across subsamples, they weaken under alternative model
+specifications, namely the addition of covariates controlling for
+demographic characteristics. Additionally, the assignment variable used
+to define voting eligibility (age in years ) is a blunt proxy that fails
+to capture exact birthdates, introducing measurement error near the
+cutoff. Furthermore, the limited internal consistency of the nativist
+items (see appendix) further constrains the robustness of these
+findings. Finally, this study truly examines medium- rather than long-
+effects, as it studies attitudes only four years later than the first
+exposure in 2016.
+
+Future work could address these gaps in several ways. First, researchers
+should replicate this design using datasets that include exact
+birthdates, improving causal precision near the eligibility threshold.
+Second, using more recent data (such as the 2024 ANES) could allow for
+studying longer-term trends exploring different cohorts and political
+cycles would help determine whether early exposure to far-right elite
+cues produces lasting attitudinal change, or whether its effects fade
+over time. Third, this study assumed that the voting eligibility itself
+is enough to trigger this political `coming of age.' However, this also
+includes a sizeable proportion of young adults who were eligible to vote
+but chose not to. Future research could instead examine the effect of
+first-time \emph{voting}, through a fuzzy RDD design that uses
+eligibility as the instrumental variable. Finally, applying the same
+logic to other political transitions, like Bolsonaro's election or the
+AfD's stronger results in Germany since 2017, could reveal whether these
+dynamics are context-dependent or broadly generalizable.
+
+In sum, while these findings complicate our assumptions about the
+downstream effects of the adoption of radical-right attitudes, they
+might ultimately be reinforcing its most worrying implication: the
+resilience of liberal democracy cannot be taken for granted, not even
+among its newest members.
+
+\newpage{}
+
+\section{Works Cited}\label{works-cited}
+
+\phantomsection\label{refs}
+\begin{CSLReferences}{1}{0}
+\bibitem[\citeproctext]{ref-anes}
+ANES. 2021. {``American National Election Study 2020 Time Series Study
+Full Release {[}Dataset and Documentation{]}.''}
+
+\bibitem[\citeproctext]{ref-bekafigo2019}
+Bekafigo, Marija A., Elena V. Stepanova, Brian A. Eiler, Kenji Noguchi,
+and Kathleen L. Ramsey. 2019. {``The Effect of Group Polarization on
+Opposition to Donald Trump.''} \emph{Political Psychology} 40 (5):
+11631178. \url{https://www.jstor.org/stable/45204110}.
+
+\bibitem[\citeproctext]{ref-calonico2025}
+Calonico, Sebastian, Matias D. Cattaneo, and Max H. Farrell. 2025.
+\emph{Rdrobust: Robust Data-Driven Statistical Inference in
+Regression-Discontinuity Designs}.
+\url{https://cran.r-project.org/web/packages/rdrobust/index.html}.
+
+\bibitem[\citeproctext]{ref-clayton2021}
+Clayton, Katherine, Nicholas T. Davis, Brendan Nyhan, Ethan Porter,
+Timothy J. Ryan, and Thomas J. Wood. 2021. {``Elite Rhetoric Can
+Undermine Democratic Norms.''} \emph{Proceedings of the National Academy
+of Sciences} 118 (23): e2024125118.
+\url{https://doi.org/10.1073/pnas.2024125118}.
+
+\bibitem[\citeproctext]{ref-cremer2023}
+Cremer, Tobias. 2023. {``A Europeanisation of American Politics?:
+Trumpism and the Populist Radical Right in the United States.''}
+\emph{Journal of Language and Politics} 22 (3): 396--414.
+\url{https://doi.org/10.1075/jlp.22135.cre}.
+
+\bibitem[\citeproctext]{ref-dinas2012}
+Dinas, Elias. 2012. {``The Formation of Voting Habits.''} \emph{Journal
+of Elections, Public Opinion and Parties} 22 (4): 431456.
+\url{https://doi.org/10.1080/17457289.2012.718280}.
+
+\bibitem[\citeproctext]{ref-dinas2013}
+---------. 2013. {``Opening {``}Openness to Change{''}: Political Events
+and the Increased Sensitivity of Young Adults.''} \emph{Political
+Research Quarterly} 66 (4): 868882.
+\url{https://doi.org/10.1177/1065912913475874}.
+
+\bibitem[\citeproctext]{ref-druckman2024}
+Druckman, James N. 2024. {``How to Study Democratic Backsliding.''}
+\emph{Political Psychology} 45 (S1): 3--42.
+\url{https://doi.org/10.1111/pops.12942}.
+
+\bibitem[\citeproctext]{ref-franklin2004}
+Franklin, Mark N. 2004. \emph{Voter Turnout and the Dynamics of
+Electoral Competition in Established Democracies Since 1945}. Cambridge:
+Cambridge University Press.
+\url{https://doi.org/10.1017/CBO9780511616884}.
+
+\bibitem[\citeproctext]{ref-ghitza2023}
+Ghitza, Yair, Andrew Gelman, and Jonathan Auerbach. 2023. {``The Great
+Society, Reagan's Revolution, and Generations of Presidential Voting.''}
+\emph{American Journal of Political Science} 67 (3): 520--37.
+\url{https://doi.org/10.1111/ajps.12713}.
+
+\bibitem[\citeproctext]{ref-graham2020}
+Graham, Matthew H., and Milan W. Svolik. 2020. {``Democracy in America?
+Partisanship, Polarization, and the Robustness of Support for Democracy
+in the United States.''} \emph{American Political Science Review} 114
+(2): 392--409. \url{https://doi.org/10.1017/S0003055420000052}.
+
+\bibitem[\citeproctext]{ref-jennings2014}
+Jennings, M. Kent, and Richard G. Niemi. 2014. \emph{Generations and
+Politics: A Panel Study of Young Adults and Their Parents}. Princeton
+University Press.
+
+\bibitem[\citeproctext]{ref-joel2014}
+Joel, Samantha, Caitlin M. Burton, and Jason E. Plaks. 2014.
+{``Conservatives Anticipate and Experience Stronger Emotional Reactions
+to Negative Outcomes.''} \emph{Journal of Personality} 82 (1): 3243.
+\url{https://doi.org/10.1111/jopy.12031}.
+
+\bibitem[\citeproctext]{ref-knuckey2022}
+Knuckey, Jonathan, and Komysha Hassan. 2022. {``Authoritarianism and
+Support for Trump in the 2016 Presidential Election.''} \emph{The Social
+Science Journal} 59 (1): 47--60.
+\url{https://doi.org/10.1016/j.soscij.2019.06.008}.
+
+\bibitem[\citeproctext]{ref-magleby2011}
+Magleby, David B., Candice J. Nelson, and Mark C. Westlye. 2011. {``The
+Myth of the Independent Voter Revisited.''} In, edited by Paul M.
+Sniderman and Benjamin Highton, 0. Princeton University Press.
+\url{https://doi.org/10.23943/princeton/9780691151106.003.0011}.
+
+\bibitem[\citeproctext]{ref-mandel2014}
+Mandel, David R., and Philip Omorogbe. 2014. {``Political Differences in
+Past, Present, and Future Life Satisfaction: Republicans Are More
+Sensitive Than Democrats to Political Climate.''} \emph{PLOS ONE} 9 (6):
+e98854. \url{https://doi.org/10.1371/journal.pone.0098854}.
+
+\bibitem[\citeproctext]{ref-mannheim1928}
+Mannheim, Karl. 1928. \emph{Le problème des générations}. Paris: Armand
+Colin.
+
+\bibitem[\citeproctext]{ref-neundorf2013}
+Neundorf, Anja, Kaat Smets, and Gema M García-Albacete. 2013.
+{``Homemade Citizens: The Development of Political Interest During
+Adolescence and Young Adulthood.''} \emph{Acta Politica} 48 (1): 92116.
+\url{https://doi.org/10.1057/ap.2012.23}.
+
+\bibitem[\citeproctext]{ref-taber2018}
+Taber, Keith S. 2018. {``The Use of Cronbach{'}s Alpha When Developing
+and Reporting Research Instruments in Science Education.''}
+\emph{Research in Science Education} 48 (6): 1273--96.
+\url{https://doi.org/10.1007/s11165-016-9602-2}.
+
+\end{CSLReferences}
+
+\newpage{}
+
+\section{Appendix}\label{appendix}
+
+For additional materials, such as details on the RDD design and index
+construction, the specific items used for the construction of the
+indices, and additional visualizations, please refer to the
+\href{https://github.com/nikolaosvichos/Online-Appendix-Coming-of-Age-Under-Trump}{online
+appendix.}
+
+Link (in case hyperlink breaks):
+\url{https://github.com/nikolaosvichos/Online-Appendix-Coming-of-Age-Under-Trump}
+
+
+
+
+\end{document}
