@@ -1,10 +1,15 @@
-#########################################################################
-#########################################################################
-############# Replication Code: "Coming of Age Under Trump" #############
-########### The Effect of First Electoral Exposure in a Trump ###########
-####### Election on Long-Term Support for Radical Right Attitudes #######
-#########################################################################
-#########################################################################
+---
+title: "Coming of Age Under Trump: Online Appendix"
+author: "Nikolaos Vichos"
+format: 
+  html:
+    embed-resources: true
+    toc: true
+editor: visual
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE, echo=FALSE}
 
 ## Author: Nikolaos VICHOS
 
@@ -14,7 +19,6 @@ library(styler)
 library(psych)
 library(dplyr)
 library(tidyverse)
-library(ggplot2)
 library(scales)
 library(rdrobust)
 library(modelsummary)
@@ -29,7 +33,7 @@ library(knitr)
 
 
 # Import data
-df_unclean <- haven::read_dta("ANES_2020_TIMESERIES.dta")
+df_unclean <- haven::read_dta("/Users/nikolaosvichos/Library/Mobile Documents/com~apple~CloudDocs/Sciences Po/Year 2/Media and Politics/Dataset/ANES_2020_TIMESERIES.dta")
 
 
 ##############################################################################################################
@@ -37,7 +41,7 @@ df_unclean <- haven::read_dta("ANES_2020_TIMESERIES.dta")
 ##############################################################################################################
 
 
-df_unstandardized <- df_unclean %>%
+df_unstandardized <- df_unclean %>% # outcome variables to remember: pre(V201366, V201376, V201377, V201375x); post(V202312, V202175)
   dplyr::select(
     V201507x, V201231x, V200003,
     V201156, V201157, V201511x,
@@ -60,7 +64,7 @@ df_unstandardized <- df_unclean %>%
     V202266, V202267, V202268,
     V202269, V202290x, V202270,
     V202273x, V202416, V202419,
-    V200004
+    V202175, V200004
   ) %>%
   filter(V200003 != 2) %>%
   filter(V200004 == 3) %>%
@@ -72,6 +76,7 @@ df_unstandardized <- df_unclean %>%
     "pre_or_post" = "V200004",
     "feeling_dems" = "V201156",
     "feeling_reps" = "V201157",
+    "feeling_journalists" = "V202175",
     "education" = "V201510",
     "education_summary" = "V201511x",
     "gender" = "V201600",
@@ -150,6 +155,10 @@ df_unstandardized <- df_unclean %>%
     ),
     feeling_reps = case_when(
       feeling_reps %in% c(-9, 998) ~ NA_integer_,
+      TRUE ~ feeling_reps
+    ),
+    feeling_journalists = case_when(
+      feeling_reps %in% c(-9, -7, -6, -5, -4, 998, 999) ~ NA_integer_,
       TRUE ~ feeling_reps
     ),
     education = case_when(
@@ -383,7 +392,7 @@ df_unstandardized <- df_unclean %>%
     immigrants_harm_culture = case_when(
       immigrants_harm_culture %in% c(-9, -8, -7, -6, -5) ~ NA_integer_,
       TRUE ~ immigrants_harm_culture
-    ),
+    )
   )
 
 # create treatment variable
@@ -393,22 +402,11 @@ df_unstandardized$treatment <- ifelse(df_unstandardized$age >= 26, 0, 1)
 df <- df_unstandardized
 
 # standardize the relevant items used to construct the index
-items_to_standardize <- c( # select the relevant items
-  "compromise_politics", "politicians_notcare", "politicians_trustworthy",
-  "politicians_mainproblem", "people_power", "politicians_carerich",
-  "officials_dont_care", "no_say_in_govt", "polsystem_for_insiders",
-  "rich_and_powerful", "few_powerful_control", "powerful_indoctrination",
-  "free_press", "checks_and_balances", "rule_of_law",
-  "media_undermined_concern", "journalist_access", "media_trust",
-  "foreign_help", "unitary_executive", "strong_leader",
-  "urban_unrest",
-  "minorities_should_adapt", "world_like_america", "america_better",
-  "immigrants_harm_culture",
-  "traditional_family_values", "child_independent_or_respect", "child_curious_or_wellmannered",
-  "child_obedient_or_selfreliant", "child_considerate_or_wellbehaved", "stay_at_home_wife"
+media_items <- c( # select the relevant items
+  "free_press", "media_trust", "media_undermined_concern", "journalist_access"
 )
 
-df[, items_to_standardize] <- scale(df[, items_to_standardize]) # standardize them
+df[, media_items] <- scale(df[, media_items]) # standardize them
 
 
 ###################################################################################################################
@@ -419,146 +417,41 @@ df[, items_to_standardize] <- scale(df[, items_to_standardize]) # standardize th
 ##### Scree-plot function #####
 
 get_screeplot <- function(outcome, outcomename) {
-
   plot(1:length(outcome$values), outcome$values,
-       type = "b",
-       ylab = "Eigenvalue", xlab = "Factor", main = paste("Scree plot —", outcomename)
+    type = "b",
+    ylab = "Eigenvalue", xlab = "Factor", main = paste("Scree plot —", outcomename)
   )
 }
 
-
-##### Populist Items#####
+##### Constructing Media Index #####
 
 # get final list of items
-populist_items <- c(
-  "compromise_politics", "politicians_notcare", "politicians_trustworthy",
-  "politicians_mainproblem", "people_power", "politicians_carerich",
-  "officials_dont_care", "no_say_in_govt", "polsystem_for_insiders",
-  "rich_and_powerful", "few_powerful_control", "powerful_indoctrination"
+media_items <- c(
+  "free_press", "media_undermined_concern", "journalist_access"
 )
 
 # check internal consistency
-psych::alpha(df[, populist_items])
+psych::alpha(df[, media_items])
 
 # factor construction
-fa_populism <- fa(
-  df[, populist_items],
+fa_media <- fa(
+  df[, media_items],
   nfactors = 1, rotate = "none", fm = "pa", max.iter = 100
 )
 
 # eigevalues
-fa_populism$values
+fa_media$values
 
 # scree plot
-screeplot_authoritarianism <- get_screeplot(fa_populism, "Populism")
-
-
-# get factor loadings
-print(fa_populism$loadings, cutoff = 0.3)
-
-# add as an index
-fa_populism_df <- as.data.frame(fa_populism$scores)
-df$populism_index <- scales::rescale(fa_populism_df[, 1], to = c(0, 1)) # 1st factor → 0–1 scale
-
-
-##### Authoritarian Items#####
-
-# get final list of items
-authoritarian_items <- c(
-  "free_press", "checks_and_balances", "rule_of_law",
-  "media_undermined_concern", "journalist_access", "media_trust",
-  "foreign_help", "unitary_executive", "strong_leader",
-  "urban_unrest"
-)
-
-# check internal consistency
-psych::alpha(df[, authoritarian_items])
-
-# factor construction
-fa_authoritarianism <- fa(
-  df[, authoritarian_items],
-  nfactors = 1, rotate = "none", fm = "pa", max.iter = 100
-)
-
-# eigevalues
-fa_authoritarianism$values
-
-# scree plot
-screeplot_authoritarianism <- get_screeplot(fa_authoritarianism, "Authoritarianism")
+screeplot_media <- get_screeplot(fa_media, "Media Attitudes")
 
 # get factor loadings
-print(fa_authoritarianism$loadings, cutoff = 0.3)
+print(fa_media$loadings, cutoff = 0.3)
 
 
 # add as an index
-fa_authoritarianism_df <- as.data.frame(fa_authoritarianism$scores)
-df$authoritarianism_index <- scales::rescale(fa_authoritarianism_df[, 1], to = c(0, 1)) # 1st factor → 0–1 scale
-
-
-##### Nativist Items#####
-
-# get final list of items
-nativist_items <- c(
-  "minorities_should_adapt", "world_like_america", "america_better",
-  "immigrants_harm_culture"
-)
-
-# check internal consistency
-psych::alpha(df[, nativist_items])
-
-# factor construction
-fa_nativism <- fa(
-  df[, nativist_items],
-  nfactors = 1, rotate = "none", fm = "pa", max.iter = 100
-)
-
-# eigevalues
-fa_nativism$values
-
-# scree plot
-screeplot_nativism <- get_screeplot(fa_nativism, "Nativism")
-
-
-# get factor loadings
-print(fa_nativism$loadings, cutoff = 0.3) # get factor loadings
-
-
-# add as an index
-fa_nativism_df <- as.data.frame(fa_nativism$scores)
-df$nativism_index <- scales::rescale(fa_nativism_df[, 1], to = c(0, 1)) # 1st factor → 0–1 scale
-
-
-##### Traditionalist Items#####
-
-# get final list of items
-traditionalist_items <- c(
-  "traditional_family_values", "child_independent_or_respect", "child_curious_or_wellmannered",
-  "child_obedient_or_selfreliant", "child_considerate_or_wellbehaved", "stay_at_home_wife"
-)
-
-# check internal consistency
-psych::alpha(df[, traditionalist_items])
-
-# factor construction
-fa_traditionalism <- fa(
-  df[, traditionalist_items],
-  nfactors = 1, rotate = "none", fm = "pa", max.iter = 100
-)
-
-# eigevalues
-fa_traditionalism$values
-
-# scree plot
-screeplot_traditionalism <- get_screeplot(fa_traditionalism, "Traditionalism")
-
-
-# get factor loadings
-print(fa_traditionalism$loadings, cutoff = 0.3) # get factor loadings
-
-
-# add as an index
-fa_traditionalism_df <- as.data.frame(fa_traditionalism$scores)
-df$traditionalism_index <- scales::rescale(fa_traditionalism_df[, 1], to = c(0, 1)) # 1st factor → 0–1 scale
+fa_media_df <- as.data.frame(fa_media$scores)
+df$media_index <- scales::rescale(fa_media_df[, 1], to = c(0, 1)) # 1st factor → 0–1 scale
 
 
 ###########################################################################################################
@@ -660,195 +553,52 @@ df_republicans <- df %>% # republicans subset
   filter(party == 2)
 
 
-# Populism models
-rdd_populism_full <- run_rdd_models( # entire sample
+# Media Attitude models
+rdd_media_full <- run_rdd_models( # entire sample
   data = df,
-  index_var = "populism_index",
+  index_var = "media_index",
   controls = c("gender", "education", "income"),
   sample_label = "Full Sample"
 )
 
-rdd_populism_independents <- run_rdd_models( # independents
+rdd_media_independents <- run_rdd_models( # independents
   data = df_independents,
-  index_var = "populism_index",
+  index_var = "media_index",
   controls = c("gender", "education", "income"),
   sample_label = "Independents"
 )
 
-rdd_populism_partisans <- run_rdd_models( # partisans
+rdd_media_partisans <- run_rdd_models( # partisans
   data = df_partisans,
-  index_var = "populism_index",
+  index_var = "media_index",
   controls = c("gender", "education", "income"),
   sample_label = "Partisans"
 )
 
-rdd_populism_democrats <- run_rdd_models( # democrats
+rdd_media_democrats <- run_rdd_models( # democrats
   data = df_democrats,
-  index_var = "populism_index",
+  index_var = "media_index",
   controls = c("gender", "education", "income"),
   sample_label = "Democrats"
 )
 
-rdd_populism_republicans <- run_rdd_models( # republicans
+rdd_media_republicans <- run_rdd_models( # republicans
   data = df_republicans,
-  index_var = "populism_index",
+  index_var = "media_index",
   controls = c("gender", "education", "income"),
   sample_label = "Republicans"
 )
 
-
-# Authoritarianism models
-rdd_authoritarianism_full <- run_rdd_models( # entire sample
-  data = df,
-  index_var = "authoritarianism_index",
-  controls = c("gender", "education", "income"),
-  sample_label = "Full Sample"
-)
-
-rdd_authoritarianism_independents <- run_rdd_models( # independents
-  data = df_independents,
-  index_var = "authoritarianism_index",
-  controls = c("gender", "education", "income"),
-  sample_label = "Independents"
-)
-
-rdd_authoritarianism_partisans <- run_rdd_models( # partisans
-  data = df_partisans,
-  index_var = "authoritarianism_index",
-  controls = c("gender", "education", "income"),
-  sample_label = "Partisans"
-)
-
-rdd_authoritarianism_democrats <- run_rdd_models( # democrats
-  data = df_democrats,
-  index_var = "authoritarianism_index",
-  controls = c("gender", "education", "income"),
-  sample_label = "Democrats"
-)
-
-rdd_authoritarianism_republicans <- run_rdd_models( # republicans
-  data = df_republicans,
-  index_var = "authoritarianism_index",
-  controls = c("gender", "education", "income"),
-  sample_label = "Republicans"
-)
-
-
-# Nativism models
-rdd_nativism_full <- run_rdd_models( # entire sample
-  data = df,
-  index_var = "nativism_index",
-  controls = c("gender", "education", "income"),
-  sample_label = "Full Sample"
-)
-
-rdd_nativism_independents <- run_rdd_models( # independents
-  data = df_independents,
-  index_var = "nativism_index",
-  controls = c("gender", "education", "income"),
-  sample_label = "Independents"
-)
-
-rdd_nativism_partisans <- run_rdd_models( # partisans
-  data = df_partisans,
-  index_var = "nativism_index",
-  controls = c("gender", "education", "income"),
-  sample_label = "Partisans"
-)
-
-rdd_nativism_democrats <- run_rdd_models( # democrats
-  data = df_democrats,
-  index_var = "nativism_index",
-  controls = c("gender", "education", "income"),
-  sample_label = "Democrats"
-)
-
-rdd_nativism_republicans <- run_rdd_models( # republicans
-  data = df_republicans,
-  index_var = "nativism_index",
-  controls = c("gender", "education", "income"),
-  sample_label = "Republicans"
-)
-
-
-# Traditionalism models
-rdd_traditionalism_full <- run_rdd_models( # entire sample
-  data = df,
-  index_var = "traditionalism_index",
-  controls = c("gender", "education", "income"),
-  sample_label = "Full Sample"
-)
-
-rdd_traditionalism_independents <- run_rdd_models( # independents
-  data = df_independents,
-  index_var = "traditionalism_index",
-  controls = c("gender", "education", "income"),
-  sample_label = "Independents"
-)
-
-rdd_traditionalism_partisans <- run_rdd_models( # partisans
-  data = df_partisans,
-  index_var = "traditionalism_index",
-  controls = c("gender", "education", "income"),
-  sample_label = "Partisans"
-)
-
-rdd_traditionalism_democrats <- run_rdd_models( # democrats
-  data = df_democrats,
-  index_var = "traditionalism_index",
-  controls = c("gender", "education", "income"),
-  sample_label = "Democrats"
-)
-
-rdd_traditionalism_republicans <- run_rdd_models( # republicans
-  data = df_republicans,
-  index_var = "traditionalism_index",
-  controls = c("gender", "education", "income"),
-  sample_label = "Republicans"
-)
 
 # Aggregate estimates in dataframes
-
-# populism
-rdd_populism <- bind_rows(rdd_populism_full, rdd_populism_independents, rdd_populism_partisans, rdd_populism_democrats, rdd_populism_republicans) %>%
-  mutate(Outcome = "Populism")
-
-# authortiarianism
-rdd_authoritarianism <- bind_rows(rdd_authoritarianism_full, rdd_authoritarianism_independents, rdd_authoritarianism_partisans, rdd_authoritarianism_democrats, rdd_authoritarianism_republicans) %>%
-  mutate(Outcome = "Authoritarianism")
-
-# nativism
-rdd_nativism <- bind_rows(rdd_nativism_full, rdd_nativism_independents, rdd_nativism_partisans, rdd_nativism_democrats, rdd_nativism_republicans) %>%
-  mutate(Outcome = "Nativism")
-
-# traditinoalism
-rdd_traditionalism <- bind_rows(rdd_traditionalism_full, rdd_traditionalism_independents, rdd_traditionalism_partisans, rdd_traditionalism_democrats, rdd_traditionalism_republicans) %>%
-  mutate(Outcome = "Traditionalism")
-
-# everything together
-rdd_all <- bind_rows(
-  rdd_populism,
-  rdd_authoritarianism,
-  rdd_nativism,
-  rdd_traditionalism
-) %>%
+rdd_media <- bind_rows(rdd_media_full, rdd_media_independents, rdd_media_partisans, rdd_media_democrats, rdd_media_republicans) %>%
+  mutate(Outcome = "Media Attitudes") %>%
   mutate(
     Sample = factor(
       Sample,
       levels = c("Republicans", "Democrats", "Partisans", "Independents", "Full Sample")
-    ),
-    Outcome = factor(
-      Outcome,
-      levels = c("Nativism", "Authoritarianism", "Populism", "Traditionalism")
     )
   )
-
-# now subsets for the two primary outcomes and the two secondary outcomes
-rdd_primary <- rdd_all %>%
-  filter(Outcome == "Populism" | Outcome == "Authoritarianism" | Outcome == "Nativism")
-
-rdd_secondary <- rdd_all %>%
-  filter(Outcome == "Traditionalism")
 
 
 ######################################################################################################################
@@ -890,29 +640,8 @@ get_coefplot <- function(dataframe, colnumber = 3) {
 }
 
 #### Get coefficient plots for the different outcome variables ####
-
-# populism
-coefplot_populism <- get_coefplot(rdd_populism, 1)
-
-# authoritarianism
-coefplot_authoritarianism <- get_coefplot(rdd_authoritarianism, 1)
-
-# nativism
-coefplot_nativism <- get_coefplot(rdd_nativism, 1)
-
-# authoritarianism
-coefplot_traditionalismn <- get_coefplot(rdd_traditionalism, 1)
-
-# primary outcome variables
-coefplot_primary <- get_coefplot(rdd_primary)
-
-# secondary outcome variables
-coefplot_secondary <- get_coefplot(rdd_secondary, 1)
-
-# all outcome variables
-coefplot_all <- get_coefplot(rdd_all)
-
-
+coefplot_media <- get_coefplot(rdd_media, 1)
+coefplot_media
 
 #####################################
 ######## Discontinuity Plots ########
@@ -930,7 +659,7 @@ get_discontinuityplot <- function(dataframe, subset, primary_only = TRUE, colnum
   df_long <- dataframe %>%
     filter(age <= 60) %>%
     pivot_longer(
-      cols = c(populism_index, authoritarianism_index, nativism_index, traditionalism_index),
+      cols = c(media_index),
       names_to = "Outcome",
       values_to = "Value"
     ) %>%
@@ -938,24 +667,21 @@ get_discontinuityplot <- function(dataframe, subset, primary_only = TRUE, colnum
     mutate(
       Outcome = recode(
         Outcome,
-        populism_index = "Populism",
-        authoritarianism_index = "Authoritarianism",
-        nativism_index = "Nativism",
-        traditionalism_index = "Traditionalism"
+        media_index = "Media Attitudes",
       ),
       Outcome = factor(
         Outcome,
-        levels = c("Nativism", "Authoritarianism",
-                   "Populism", "Traditionalism")
-      ),
-      Value = 1- Value #reverse, for clearer visualization
+        levels = c(
+          "Media Attitudes"
+        )
+      )
     )
 
-  # Check whether only primary variables should be kept
-  if (primary_only){
-    df_long <- df_long %>%
-      filter(Outcome == "Populism" | Outcome == "Authoritarianism" | Outcome == "Nativism")
-  }
+  # NOT APPLICABLE TO THIS PROJECT Check whether only primary variables should be kept
+  # if (primary_only) {
+  #   df_long <- df_long %>%
+  #     filter(Outcome == "Populism" | Outcome == "Authoritarianism" | Outcome == "Nativism")
+  # }
 
   # Now do the plotting
   ggplot(df_long, aes(x = age, y = Value, color = factor(treatment))) +
@@ -977,8 +703,8 @@ get_discontinuityplot <- function(dataframe, subset, primary_only = TRUE, colnum
     labs(
       x = "Age in 2020",
       y = NULL,
-      title = paste("Discontinuities in Radical Right Attitudes Among", subset),
-      subtitle = "Across Multiple Outcomes"
+      title = paste("Discontinuities in Media Attitudes Among", subset),
+      subtitle = paste(subset)
     ) +
     theme_bw() +
     theme(
@@ -986,9 +712,8 @@ get_discontinuityplot <- function(dataframe, subset, primary_only = TRUE, colnum
       plot.title = element_text(face = "bold", hjust = 0.5),
       plot.subtitle = element_text(hjust = 0.5)
     ) +
-    facet_wrap(~ Outcome, scales = "free_y", ncol = colnumber)
+    facet_wrap(~Outcome, scales = "free_y", ncol = colnumber)
 }
-
 
 
 #### Get coefficient plots for the different subgroups ####
@@ -1007,3 +732,319 @@ discontinuityplot_democrats <- get_discontinuityplot(df_democrats, "Democrats")
 
 # republicans
 discontinuityplot_republicans <- get_discontinuityplot(df_republicans, "Republicans")
+
+
+
+
+```
+
+\toc
+
+## Introduction
+
+This document is the online appendix for the paper "Coming of Age Under Trump The Effect of First Electoral Exposure in a Trump Election on Long-Term Support for Press Freedom" Here I have included additional, mainly methodological, details not included in the main body of the paper.
+
+## Regression Design
+
+Since linear models estimated via ordinary least squares may miss subtle non-linearities in how the outcome evolves with age, I estimate a more flexible version of the RDD.[^1] This can be expressed as:
+
+[^1]: Of course, this version can take a linear form; however, it is also generalizable to higher polynomial degrees.
+
+$$
+Y_i = \alpha + \tau D_i + f(X_i - c) + \varepsilon_i
+$$
+
+Where:
+
+-   $Y_i$ is the outcome, measuring attitudes toward media freedom
+-   $D_i$ is an indicator equal to 1 if individual $i$’s age *exceeds* the cutoff (i.e., they were just *eligible* to vote in 2012), and 0 otherwise.[^2]
+-   $\tau$ is the parameter of interest, capturing the size of the discontinuity at the threshold—that is, the causal effect of being first eligible to vote in 2012 rather than in 2016.
+-   $X_i$ is the running variable, the respondent’s age in years in 2020.
+-   $f(X_i - c)$ denotes a flexible function (e.g., first- or second-order polynomial) of the centered running variable—distance from the cutoff $c$.
+-   $c = 26$ is the cutoff point, so $X_i - c$ represents the running variable centered at the threshold.
+-   $\varepsilon_i$ is an error term.
+
+[^2]: This might seem counter-intuitive, since the group of interest (young voters) becomes, in a sense, the 'control group'. This is due to the specific design of the R package used (rdrobust), which estimates causal effects when the running variable crosses the cut-off.
+
+In my analysis, I estimated a series of sharp RD models using local polynomial regression. Each model used local linear estimation (polynomial order = 1) and MSE-optimal bandwidth selection to obtain the treatment effect at the cutoff.
+
+## Index Construction
+
+This section documents the construction of the indices, including item wording, internal consistency, factor structure, and rescaling.
+
+### Item Wordings
+
+The tables below provided the exact question wording for each item included in the indices. Most responses were in a 5- or 7-point Likert scale.
+
+| Shortened Name | Survey Question |
+|------------------------------------|------------------------------------|
+| Free Press | First, how important is it that news organizations are free to criticize political leaders? |
+| Concern for Media Undermining | How concerned are you that some people in the government today might want to undermine the news media’s ability to serve as a check on governmental power? |
+| Journalist Access | Do you favor, oppose, or neither favor nor oppose elected officials restricting journalists’ access to information about government decision-making? |
+
+: Media Freedom Attitudes Items and Survey Wording
+
+### Internal Consistency
+
+To evaluate the internal consistency of the items used in the indices, I computed Cronbach’s α for each the aforementioned set of items. Both the raw and the standardized alpha (α = 0.7) show acceptable consistency [@taber2018].
+
+### Factor Structure
+
+Next, I used principal axis factoring (no rotation) to assess whether the three items capture a single underlying construct. Based on the Kaiser criterion (eigenvalue \> 1) a single factor was retained for each item. Factor loadings for each index's selected items were above 0.35, confirming unidimensionality.
+
+```{r, echo = FALSE, warning = FALSE}
+#| label: fig-screeplot-media
+#| echo: false
+#| warning: false
+#| fig-width: 8
+#| fig-height: 4
+#| fig-align: center
+#| fig-cap: "Scree Plot: Eigenvalues for Media Freedom Factors)"
+#| fig-pos: H
+
+get_screeplot(fa_media, "Media Attitudes")
+
+```
+
+
+### Index Rescaling
+
+Each index is constructed by extracting individual scores on the first factor and rescaling them to range from 0 to 1 using min–max normalization. Even though higher values indicate *lower* endorsement for radical right attitudes during the process of index construction, this is for visualization and interpretability purposes, due to the specific design of the rdrobust package [@calonico2025]. In the package, the threshold is "crossed" from left to right—hence, normally, a positive effect would suggest an increase in nativist, authoritarian, or populist attitudes among those who voted for the first time in *2012.* However, for clearer comprehension, the results have been reversed, and the indices can be interpreted as indicating *decreasing* support for each of the three ideological features. However, strictly speaking, the indices indicate the opposite direction in their construction. For details on the process of index construction, refer to the replication code file.
+
+## RD Results
+
+The detailed estimates of the RDD are shown below in table format.
+
+```{r, results='asis', echo = FALSE, warning=FALSE}
+rdd_media %>%
+  mutate(
+    Sample = factor(
+      Sample,
+      levels = c("Republicans", "Democrats", "Partisans", "Independents", "Full Sample")
+    ),
+    Outcome = factor(
+      Outcome,
+      levels = c("Media Attitudes")
+    )) %>%
+kable(
+    format = "html",
+    booktabs = TRUE,
+    caption = "Regression Discontinuity Estimates on Support for Media Freedom"
+  ) #%>%
+  #kable_styling(latex_options = c("HOLD_position"))
+```
+
+
+## Robustness Checks
+
+I present the robustness checks conducted the two models (Simple vs Controls) and for the three different RD estimates (Conventional, Bias-Adjusted, Bias-Adjusted with Robust SEs). I first present them for the full sample and then for the different subgroup. Due to their large number, however, they are quite difficult to navigate.
+
+To narrow them down a bit I only focus on outcomes where there was at least one significant result (i.e., *not* populism) and across groups that also had at least one significant result (i.e., *not* partisans or democrats)
+
+```{r}
+#| echo: false
+#| warning: false
+#| #fig-width: 7
+#| #fig-height: 2
+#| out.width: "100%"
+
+get_robustnesssplots <- function(dataframe, outcome, estimate_type = 1, include_covariates = FALSE, subset_name = NULL) {
+  
+  # Get the name of the dataframe to determine subset
+  if (is.null(subset_name)) {
+    df_name <- deparse(substitute(dataframe))
+    
+    subset_name <- switch(
+      df_name,
+      df = "Full Sample",
+      df_independents = "Independents", 
+      df_partisans = "Partisans", 
+      df_democrats = "Democrats", 
+      df_republicans = "Republicans",
+      "Unknown Sample"
+    )
+  }
+  # If subset_name is provided, use it as-is (don't try to derive it)
+  
+  # Remove NAs from outcome and age variables
+  if (include_covariates) {
+    dataframe <- dataframe[complete.cases(dataframe[[outcome]], dataframe$age, 
+                                          dataframe$gender, dataframe$education, dataframe$income), ]
+  } else {
+    dataframe <- dataframe[complete.cases(dataframe[[outcome]], dataframe$age), ]
+  }
+  if (include_covariates) {
+    covariates <- dataframe[, c("gender", "education", "income"), drop = FALSE]
+    control_type <- "(With Controls)"
+  } else {
+    covariates <- NULL
+    control_type <- "(Without Controls)"
+  }
+  
+  outcome_name <- switch(
+    as.character(outcome),
+    "media_index" = "Media Attitudes,",
+    stop("Unknown outcome variable")
+  )
+  
+  estimate_name <- switch(
+    as.character(estimate_type),
+    "1" = "Conventional Estimates",
+    "2" = "Bias-Adjusted Estimates",
+    "3" = "Bias-Adjusted Estimates with Robust Standard Errors",
+    stop("estimate_type must be 1, 2, or 3")
+  )
+  
+  #######  Bandwidth Robustness Checks #######
+  
+  bandwidths <- seq(4, 16, by = 1)
+  
+  results_bandwidths <- map_dfr(bandwidths, function(h) {
+    r <- rdrobust(y = dataframe[[outcome]], x = dataframe$age, c = 26, h = h, p = 1, covs = covariates)
+    
+    tibble(
+      bandwidth = h,
+      estimate = r$coef[estimate_type],
+      se = r$se[estimate_type]
+    )
+  })
+  
+  graph_bandwidths <- ggplot(results_bandwidths, aes(x = bandwidth, y = estimate)) +
+    geom_point() +
+    geom_errorbar(aes(ymin = estimate - 1.96 * se, ymax = estimate + 1.96 * se), width = 0.15) +
+    geom_hline(yintercept = 0, linetype = "dashed") +
+    labs(
+      x = "Bandwidth",
+      y = "LATE",
+      title = "Bandwidth Choice",
+      subtitle = "(1st-Order Polynomial, Cutoff = 26)"
+    ) +
+    theme_classic(base_size = 8) +
+    theme(
+      plot.title = element_text(face = "bold", hjust = 0.5, size = 8),
+      plot.subtitle = element_text(hjust = 0.5)
+    )
+  
+  ## Cutoff Robustness Checks ##
+  
+  cutoffs <- seq(24, 28, by = 1)
+  
+  results_cutoffs <- map_dfr(cutoffs, function(cutoff) {
+    r <- rdrobust(y = dataframe[[outcome]], x = dataframe$age, c = cutoff, p = 1, covs = covariates)
+    
+    tibble(
+      cutoff = cutoff,
+      estimate = r$coef[estimate_type],
+      se = r$se[estimate_type]
+    )
+  })
+  
+  graph_cutoffs <- ggplot(results_cutoffs, aes(x = cutoff, y = estimate)) +
+    geom_point() +
+    geom_errorbar(aes(ymin = estimate - 1.96 * se, ymax = estimate + 1.96 * se), width = 0.15) +
+    geom_hline(yintercept = 0, linetype = "dashed") +
+    labs(
+      x = "Cutoff",
+      y = "LATE",
+      title = "Cutoff Choice",
+      subtitle = "(MSE Bandwidth, 1st-Order Polynomial)"
+    ) +
+    theme_classic(base_size = 8) +
+    theme(
+      plot.title = element_text(face = "bold", hjust = 0.5, size = 8),
+      plot.subtitle = element_text(hjust = 0.5)
+    )
+  
+  ## Polynomial Robustness Checks ##
+  
+  polynomials <- seq(0, 3, by = 1)
+  
+  results_polynomials <- map_dfr(polynomials, function(polynomial) {
+    r <- rdrobust(y = dataframe[[outcome]], x = dataframe$age, c = 26, p = polynomial, covs = covariates)
+    
+    tibble(
+      polynomial = polynomial,
+      estimate = r$coef[estimate_type],
+      se = r$se[estimate_type]
+    )
+  })
+  
+  graph_polynomials <- ggplot(results_polynomials, aes(x = polynomial, y = estimate)) +
+    geom_point() +
+    geom_errorbar(aes(ymin = estimate - 1.96 * se, ymax = estimate + 1.96 * se), width = 0.15) +
+    geom_hline(yintercept = 0, linetype = "dashed") +
+    labs(
+      x = "Polynomial Degree",
+      y = "LATE",
+      title = "Polynomial Degree",
+      subtitle = "(MSE Bandwidth, Cutoff = 26)"
+    ) +
+    theme_classic() +
+    theme(
+      plot.title = element_text(face = "bold", hjust = 0.5, size = 8),
+      plot.subtitle = element_text(hjust = 0.5)
+    )
+  
+  (graph_bandwidths | graph_cutoffs | graph_polynomials) +
+    plot_annotation(
+      title = paste(
+        #outcome_name,
+        estimate_name,
+        "Among",
+        subset_name,
+        control_type
+      ),
+      theme = theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 10)) 
+    ) +
+    theme(
+    aspect.ratio = 2.3)
+}
+
+
+# Create list of dataframes with their names
+dataframes <- list(
+  "Full Sample" = df,
+  "Independents" = df_independents,
+  "Republicans" = df_republicans
+)
+
+estimate_types <- c(1, 2, 3)
+covariate_options <- c(FALSE, TRUE)
+
+# Create all combinations
+combinations <- expand.grid(
+  subset_name = names(dataframes),
+  estimate_type = estimate_types,
+  include_covariates = covariate_options,
+  stringsAsFactors = FALSE
+)
+
+# Run all combinations
+library(purrr)
+
+# For Quarto/RMarkdown, explicitly print plots
+walk(1:nrow(combinations), function(i) {
+  subset_name <- combinations$subset_name[i]
+  estimate_type <- combinations$estimate_type[i]
+  include_covariates <- combinations$include_covariates[i]
+  
+  # Get the actual dataframe
+  df_to_use <- dataframes[[subset_name]]
+  
+  # Create and print the plot
+  p <- get_robustnesssplots(
+    dataframe = df_to_use,
+    outcome = "media_index",
+    estimate_type = estimate_type,
+    include_covariates = include_covariates,
+    subset_name = subset_name
+  )
+  
+  # Explicitly print for Quarto/RMarkdown
+  print(p)
+  
+  # Add spacing between plots
+  cat("\n\n")
+})
+
+```
