@@ -21,6 +21,7 @@ library(ggthemes)
 library(patchwork)
 library(tibble)
 library(knitr)
+library(ggtext)
 
 
 # Create & use %notin%
@@ -391,14 +392,14 @@ df_unstandardized <- df_unclean %>% # outcome variables to remember: pre(V201366
   )
 
 # create treatment variable
-df_unstandardized$treatment <- ifelse(df_unstandardized$age >= 26, 0, 1)
+df_unstandardized$treatment <- ifelse(df_unstandardized$age >= 26, 1, 0)
 
 # create a copy, that will be the standardized version of the dataset for the DVs
 df <- df_unstandardized
 
 # standardize the relevant items used to construct the index
 media_items <- c( # select the relevant items
-  "free_press", "media_trust", "media_undermined_concern", "journalist_access"
+  "free_press", "media_undermined_concern", "journalist_access"
 )
 
 df[, media_items] <- scale(df[, media_items]) # standardize them
@@ -609,10 +610,16 @@ rdd_media <- bind_rows(rdd_media_full, rdd_media_independents, rdd_media_partisa
 #### Define function for coefplots ####
 
 get_coefplot <- function(dataframe, colnumber = 3) {
-  ggplot(dataframe, aes(y = Sample, x = Estimate, color = Model)) +
+  
+  dataframe <- dataframe %>% 
+    mutate(
+      Estimate_Inverse = - Estimate
+    )
+  
+  ggplot(dataframe, aes(y = Sample, x = Estimate_Inverse, color = Model)) +
     geom_point(position = position_dodge(width = 0.6), size = 2.5) +
     geom_errorbarh(
-      aes(xmin = Estimate - 1.96 * SE, xmax = Estimate + 1.96 * SE),
+      aes(xmin = Estimate_Inverse - 1.96 * SE, xmax = Estimate_Inverse + 1.96 * SE),
       height = 0.25,
       position = position_dodge(width = 0.6)
     ) +
@@ -646,40 +653,49 @@ coefplot_media <- get_coefplot(rdd_media, 1)
 #### Define function for discontinuity plots ####
 
 
-get_discontinuityplot <- function(dataframe, subset, primary_only = TRUE, colnumber = 3) { # arguments:
-  # dataframe referring to the specific subset,
-  # a string identifying the subset, and column numbers
-  # primary outcomes or include traditionalism too
+get_discontinuityplot <- function(dataframe, outcome = "media_index", outcome_name = "Media Attitudes", colnumber = 2) { # arguments:
+  # dataframe
+  # the outcome of interest (specific index)
+  # a string referring to the outcome name to be printed
   # number of columns
-  df_long <- dataframe %>%
-    filter(age <= 60) %>%
-    pivot_longer(
-      cols = c(media_index),
-      names_to = "Outcome",
-      values_to = "Value"
-    ) %>%
-    filter(!is.na(Value)) %>%
+
+  dataframe <- dataframe %>%
+    filter(age <= 60, !is.na(party))
+
+  df_all <- dataframe %>% # republicans, democrats, independents
     mutate(
-      Outcome = recode(
-        Outcome,
-        media_index = "Media Attitudes",
-      ),
-      Outcome = factor(
-        Outcome,
-        levels = c(
-          "Media Attitudes"
-        )
+      subgroup = case_when(
+        party == 1 ~ "Democrats",
+        party == 2 ~ "Republicans",
+        party == 3 ~ "Independents"
       )
     )
 
-  # NOT APPLICABLE TO THIS PROJECT Check whether only primary variables should be kept
-  # if (primary_only) {
-  #   df_long <- df_long %>%
-  #     filter(Outcome == "Populism" | Outcome == "Authoritarianism" | Outcome == "Nativism")
-  # }
+  df_partisans <- dataframe %>% # partisans subset
+    filter(party %in% c(1, 2)) %>%
+    mutate(
+      subgroup = "Partisans"
+    )
 
-  # Now do the plotting
-  ggplot(df_long, aes(x = age, y = Value, color = factor(treatment))) +
+
+  df_plot <- bind_rows(
+    df_all,
+    df_partisans
+  ) %>%
+    filter(age <= 60, !is.na(.data[[outcome]]), !is.na(subgroup)) %>%
+    mutate(subgroup = factor(
+      subgroup,
+      levels = c(
+        "Independents",
+        "Partisans",
+        "Democrats",
+        "Republicans"
+      )
+    ))
+
+
+  # Now plot the grid #
+  plot_subgroups <- ggplot(df_plot, aes(x = age, y = .data[[outcome]], color = factor(treatment))) +
     geom_point(alpha = 0.5) +
     geom_smooth(
       aes(group = factor(treatment)),
@@ -698,8 +714,8 @@ get_discontinuityplot <- function(dataframe, subset, primary_only = TRUE, colnum
     labs(
       x = "Age in 2020",
       y = NULL,
-      title = paste("Discontinuities in Media Attitudes Among", subset),
-      subtitle = paste(subset)
+      title = paste("Discontinuities in", outcome_name),
+      subtitle = paste("Among Different Partisanship Categories")
     ) +
     theme_bw() +
     theme(
@@ -707,33 +723,52 @@ get_discontinuityplot <- function(dataframe, subset, primary_only = TRUE, colnum
       plot.title = element_text(face = "bold", hjust = 0.5),
       plot.subtitle = element_text(hjust = 0.5)
     ) +
-    facet_wrap(~Outcome, scales = "free_y", ncol = colnumber)
+    facet_wrap(~subgroup, scales = "free_y", ncol = colnumber)
+
+
+  plot_all <- ggplot(dataframe, aes(x = age, y = .data[[outcome]], color = factor(treatment))) +
+    geom_point(alpha = 0.5) +
+    geom_smooth(
+      aes(group = factor(treatment)),
+      method = "lm",
+      formula = y ~ poly(x, 1),
+      se = TRUE,
+      color = "black",
+      alpha = 0.75
+    ) +
+    geom_vline(xintercept = 26, linetype = "dashed", color = "black") +
+    scale_color_brewer(
+      palette = "Dark2",
+      name = "2012 Voting Eligibility",
+      labels = c("Not Eligible (<26)", "Eligible (≥26)")
+    ) +
+    labs(
+      x = "Age in 2020",
+      y = NULL,
+      title = paste("Discontinuities in", outcome_name),
+      subtitle = paste("Independents, Democrats, and Republicans (Full Sample)")
+    ) +
+    theme_bw() +
+    theme(
+      legend.position = "bottom",
+      plot.title = element_text(face = "bold", hjust = 0.5),
+      plot.subtitle = element_text(hjust = 0.5)
+    )
+
+
+  plots <- list(
+    plot_all = plot_all,
+    plot_subgroups = plot_subgroups
+  )
 }
 
 
 #### Get discontinuity plots plots for the different subgroups ####
 
 # full sample
-discontinuityplot_all <- get_discontinuityplot(df, "All Respondents", primary_only = TRUE)
+discontinuityplot <- get_discontinuityplot(df)
 
-# independents
-discontinuityplot_independents <- get_discontinuityplot(df_independents, "Independents")
-
-# partisans
-discontinuityplot_partisans <- get_discontinuityplot(df_partisans, "Partisans")
-
-# democrats
-discontinuityplot_democrats <- get_discontinuityplot(df_democrats, "Democrats")
-
-# republicans
-discontinuityplot_republicans <- get_discontinuityplot(df_republicans, "Republicans")
 
 # Display plots
-discontinuityplot_all
-discontinuityplot_partisans
-discontinuityplot_independents
-discontinuityplot_democrats
-discontinuityplot_republicans
+discontinuityplot
 coefplot_media
-
-

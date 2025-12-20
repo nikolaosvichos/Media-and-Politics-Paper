@@ -11,6 +11,14 @@ bibliography: references.bib
 
 ```{r setup, include=FALSE, echo=FALSE}
 
+#########################################################################
+#########################################################################
+############# Replication Code: "Coming of Age Under Trump" #############
+########### The Effect of First Electoral Exposure in a Trump ###########
+################# Election on Long-Term Media Attitudes #################
+#########################################################################
+#########################################################################
+
 ## Author: Nikolaos VICHOS
 
 
@@ -26,6 +34,7 @@ library(ggthemes)
 library(patchwork)
 library(tibble)
 library(knitr)
+library(ggtext)
 
 
 # Create & use %notin%
@@ -427,7 +436,7 @@ get_screeplot <- function(outcome, outcomename) {
 
 # get final list of items
 media_items <- c(
-  "free_press", "media_undermined_concern", "journalist_access"
+  "free_press", "media_trust", "media_undermined_concern", "journalist_access"
 )
 
 # check internal consistency
@@ -614,10 +623,16 @@ rdd_media <- bind_rows(rdd_media_full, rdd_media_independents, rdd_media_partisa
 #### Define function for coefplots ####
 
 get_coefplot <- function(dataframe, colnumber = 3) {
-  ggplot(dataframe, aes(y = Sample, x = Estimate, color = Model)) +
+  
+  dataframe <- dataframe %>% 
+    mutate(
+      Estimate_Inverse = - Estimate
+    )
+  
+  ggplot(dataframe, aes(y = Sample, x = Estimate_Inverse, color = Model)) +
     geom_point(position = position_dodge(width = 0.6), size = 2.5) +
     geom_errorbarh(
-      aes(xmin = Estimate - 1.96 * SE, xmax = Estimate + 1.96 * SE),
+      aes(xmin = Estimate_Inverse - 1.96 * SE, xmax = Estimate_Inverse + 1.96 * SE),
       height = 0.25,
       position = position_dodge(width = 0.6)
     ) +
@@ -641,7 +656,7 @@ get_coefplot <- function(dataframe, colnumber = 3) {
 
 #### Get coefficient plots for the different outcome variables ####
 coefplot_media <- get_coefplot(rdd_media, 1)
-coefplot_media
+
 
 #####################################
 ######## Discontinuity Plots ########
@@ -651,40 +666,49 @@ coefplot_media
 #### Define function for discontinuity plots ####
 
 
-get_discontinuityplot <- function(dataframe, subset, primary_only = TRUE, colnumber = 3) { # arguments:
-  # dataframe referring to the specific subset,
-  # a string identifying the subset, and column numbers
-  # primary outcomes or include traditionalism too
+get_discontinuityplot <- function(dataframe, outcome = "media_index", outcome_name = "Media Attitudes", colnumber = 2) { # arguments:
+  # dataframe
+  # the outcome of interest (specific index)
+  # a string referring to the outcome name to be printed
   # number of columns
-  df_long <- dataframe %>%
-    filter(age <= 60) %>%
-    pivot_longer(
-      cols = c(media_index),
-      names_to = "Outcome",
-      values_to = "Value"
-    ) %>%
-    filter(!is.na(Value)) %>%
+
+  dataframe <- dataframe %>%
+    filter(age <= 60, !is.na(party))
+
+  df_all <- dataframe %>% # republicans, democrats, independents
     mutate(
-      Outcome = recode(
-        Outcome,
-        media_index = "Media Attitudes",
-      ),
-      Outcome = factor(
-        Outcome,
-        levels = c(
-          "Media Attitudes"
-        )
+      subgroup = case_when(
+        party == 1 ~ "Democrats",
+        party == 2 ~ "Republicans",
+        party == 3 ~ "Independents"
       )
     )
 
-  # NOT APPLICABLE TO THIS PROJECT Check whether only primary variables should be kept
-  # if (primary_only) {
-  #   df_long <- df_long %>%
-  #     filter(Outcome == "Populism" | Outcome == "Authoritarianism" | Outcome == "Nativism")
-  # }
+  df_partisans <- dataframe %>% # partisans subset
+    filter(party %in% c(1, 2)) %>%
+    mutate(
+      subgroup = "Partisans"
+    )
 
-  # Now do the plotting
-  ggplot(df_long, aes(x = age, y = Value, color = factor(treatment))) +
+
+  df_plot <- bind_rows(
+    df_all,
+    df_partisans
+  ) %>%
+    filter(age <= 60, !is.na(.data[[outcome]]), !is.na(subgroup)) %>%
+    mutate(subgroup = factor(
+      subgroup,
+      levels = c(
+        "Independents",
+        "Partisans",
+        "Democrats",
+        "Republicans"
+      )
+    ))
+
+
+  # Now plot the grid #
+  plot_subgroups <- ggplot(df_plot, aes(x = age, y = .data[[outcome]], color = factor(treatment))) +
     geom_point(alpha = 0.5) +
     geom_smooth(
       aes(group = factor(treatment)),
@@ -703,8 +727,8 @@ get_discontinuityplot <- function(dataframe, subset, primary_only = TRUE, colnum
     labs(
       x = "Age in 2020",
       y = NULL,
-      title = paste("Discontinuities in Media Attitudes Among", subset),
-      subtitle = paste(subset)
+      title = paste("Discontinuities in", outcome_name),
+      subtitle = paste("Among Different Partisanship Categories")
     ) +
     theme_bw() +
     theme(
@@ -712,77 +736,65 @@ get_discontinuityplot <- function(dataframe, subset, primary_only = TRUE, colnum
       plot.title = element_text(face = "bold", hjust = 0.5),
       plot.subtitle = element_text(hjust = 0.5)
     ) +
-    facet_wrap(~Outcome, scales = "free_y", ncol = colnumber)
+    facet_wrap(~subgroup, scales = "free_y", ncol = colnumber)
+
+
+  plot_all <- ggplot(dataframe, aes(x = age, y = .data[[outcome]], color = factor(treatment))) +
+    geom_point(alpha = 0.5) +
+    geom_smooth(
+      aes(group = factor(treatment)),
+      method = "lm",
+      formula = y ~ poly(x, 1),
+      se = TRUE,
+      color = "black",
+      alpha = 0.75
+    ) +
+    geom_vline(xintercept = 26, linetype = "dashed", color = "black") +
+    scale_color_brewer(
+      palette = "Dark2",
+      name = "2012 Voting Eligibility",
+      labels = c("Not Eligible (<26)", "Eligible (≥26)")
+    ) +
+    labs(
+      x = "Age in 2020",
+      y = NULL,
+      title = paste("Discontinuities in", outcome_name),
+      subtitle = paste("Independents, Democrats, and Republicans (Full Sample)")
+    ) +
+    theme_bw() +
+    theme(
+      legend.position = "bottom",
+      plot.title = element_text(face = "bold", hjust = 0.5),
+      plot.subtitle = element_text(hjust = 0.5)
+    )
+
+
+  plots <- list(
+    plot_all = plot_all,
+    plot_subgroups = plot_subgroups
+  )
 }
 
 
-#### Get coefficient plots for the different subgroups ####
+#### Get discontinuity plots plots for the different subgroups ####
 
 # full sample
-discontinuityplot_all <- get_discontinuityplot(df, "All Respondents", primary_only = TRUE)
-
-# independents
-discontinuityplot_independents <- get_discontinuityplot(df_independents, "Independents")
-
-# partisans
-discontinuityplot_partisans <- get_discontinuityplot(df_partisans, "Partisans")
-
-# democrats
-discontinuityplot_democrats <- get_discontinuityplot(df_democrats, "Democrats")
-
-# republicans
-discontinuityplot_republicans <- get_discontinuityplot(df_republicans, "Republicans")
+discontinuityplot <- get_discontinuityplot(df)
 
 
 
 
 ```
 
-\toc
-
 ## Introduction
 
-This document is the online appendix for the paper "Coming of Age Under Trump The Effect of First Electoral Exposure in a Trump Election on Long-Term Support for Press Freedom" Here I have included additional, mainly methodological, details not included in the main body of the paper.
+This document is the online appendix for the paper "Coming of Age Under Trump The Effect of First Electoral Exposure in a Trump Election on Long-Term Support for Liberal Democratic Protections of Media Freedom." Here I have included additional methodological details not included in the main body of the paper.
 
 ## Regression Design
-
-Since linear models estimated via ordinary least squares may miss subtle non-linearities in how the outcome evolves with age, I estimate a more flexible version of the RDD.[^1] This can be expressed as:
-
-[^1]: Of course, this version can take a linear form; however, it is also generalizable to higher polynomial degrees.
-
-$$
-Y_i = \alpha + \tau D_i + f(X_i - c) + \varepsilon_i
-$$
-
-Where:
-
--   $Y_i$ is the outcome, measuring attitudes toward media freedom
--   $D_i$ is an indicator equal to 1 if individual $i$’s age *exceeds* the cutoff (i.e., they were just *eligible* to vote in 2012), and 0 otherwise.[^2]
--   $\tau$ is the parameter of interest, capturing the size of the discontinuity at the threshold—that is, the causal effect of being first eligible to vote in 2012 rather than in 2016.
--   $X_i$ is the running variable, the respondent’s age in years in 2020.
--   $f(X_i - c)$ denotes a flexible function (e.g., first- or second-order polynomial) of the centered running variable—distance from the cutoff $c$.
--   $c = 26$ is the cutoff point, so $X_i - c$ represents the running variable centered at the threshold.
--   $\varepsilon_i$ is an error term.
-
-[^2]: This might seem counter-intuitive, since the group of interest (young voters) becomes, in a sense, the 'control group'. This is due to the specific design of the R package used (rdrobust), which estimates causal effects when the running variable crosses the cut-off.
 
 In my analysis, I estimated a series of sharp RD models using local polynomial regression. Each model used local linear estimation (polynomial order = 1) and MSE-optimal bandwidth selection to obtain the treatment effect at the cutoff.
 
 ## Index Construction
-
-This section documents the construction of the indices, including item wording, internal consistency, factor structure, and rescaling.
-
-### Item Wordings
-
-The tables below provided the exact question wording for each item included in the indices. Most responses were in a 5- or 7-point Likert scale.
-
-| Shortened Name | Survey Question |
-|------------------------------------|------------------------------------|
-| Free Press | First, how important is it that news organizations are free to criticize political leaders? |
-| Concern for Media Undermining | How concerned are you that some people in the government today might want to undermine the news media’s ability to serve as a check on governmental power? |
-| Journalist Access | Do you favor, oppose, or neither favor nor oppose elected officials restricting journalists’ access to information about government decision-making? |
-
-: Media Freedom Attitudes Items and Survey Wording
 
 ### Internal Consistency
 
@@ -790,7 +802,7 @@ To evaluate the internal consistency of the items used in the indices, I compute
 
 ### Factor Structure
 
-Next, I used principal axis factoring (no rotation) to assess whether the three items capture a single underlying construct. Based on the Kaiser criterion (eigenvalue \> 1) a single factor was retained for each item. Factor loadings for each index's selected items were above 0.35, confirming unidimensionality.
+Next, I used principal axis factoring (no rotation) to assess whether the three items capture a single underlying construct. Based on the Kaiser criterion (eigenvalue \> 1) a single factor was retained for each item. Factor loadings for each index's selected items were above 0.6, confirming unidimensionality.
 
 ```{r, echo = FALSE, warning = FALSE}
 #| label: fig-screeplot-media
@@ -806,10 +818,9 @@ get_screeplot(fa_media, "Media Attitudes")
 
 ```
 
-
 ### Index Rescaling
 
-Each index is constructed by extracting individual scores on the first factor and rescaling them to range from 0 to 1 using min–max normalization. Even though higher values indicate *lower* endorsement for radical right attitudes during the process of index construction, this is for visualization and interpretability purposes, due to the specific design of the rdrobust package [@calonico2025]. In the package, the threshold is "crossed" from left to right—hence, normally, a positive effect would suggest an increase in nativist, authoritarian, or populist attitudes among those who voted for the first time in *2012.* However, for clearer comprehension, the results have been reversed, and the indices can be interpreted as indicating *decreasing* support for each of the three ideological features. However, strictly speaking, the indices indicate the opposite direction in their construction. For details on the process of index construction, refer to the replication code file.
+Each index is constructed by extracting individual scores on the first factor and rescaling them to range from 0 to 1 using min–max normalization. Even though higher values indicate higher support for liberal democratic, this was reversed during production of the coefficient plot for visualization and interpretability purposes, due to the specific design of the rdrobust package [@calonico2025]. In the package, the threshold is "crossed" from left to right—hence, normally, a positive effect would suggest more positive media attitudes among those who voted for the first time in *2012.* However, for clearer comprehension, the results have been reversed, and the indices can be interpreted in accordance with the wording of the hypotheses. For details on the process of index construction, refer to the replication code file.
 
 ## RD Results
 
@@ -830,16 +841,14 @@ kable(
     format = "html",
     booktabs = TRUE,
     caption = "Regression Discontinuity Estimates on Support for Media Freedom"
-  ) #%>%
-  #kable_styling(latex_options = c("HOLD_position"))
+  )
 ```
-
 
 ## Robustness Checks
 
-I present the robustness checks conducted the two models (Simple vs Controls) and for the three different RD estimates (Conventional, Bias-Adjusted, Bias-Adjusted with Robust SEs). I first present them for the full sample and then for the different subgroup. Due to their large number, however, they are quite difficult to navigate.
+I present the robustness checks conducted for the two models (Simple vs Controls) and for the three different RD estimates (Conventional, Bias-Adjusted, Bias-Adjusted with Robust SEs). I test the results' robustness to different bandwidths, placebo cut-offs (different ages), and different polynomial degrees.
 
-To narrow them down a bit I only focus on outcomes where there was at least one significant result (i.e., *not* populism) and across groups that also had at least one significant result (i.e., *not* partisans or democrats)
+To narrow them down and improve readability, I only include subgroups that had statistically significant results (i.e., independents and Republicans). Overall, the sensitivity of the results to the first and third specifications, as well as to the addition of robust standard errors casts some doubt on their statistical significance.
 
 ```{r}
 #| echo: false
@@ -979,7 +988,7 @@ get_robustnesssplots <- function(dataframe, outcome, estimate_type = 1, include_
       title = "Polynomial Degree",
       subtitle = "(MSE Bandwidth, Cutoff = 26)"
     ) +
-    theme_classic() +
+    theme_classic(base_size = 8) +
     theme(
       plot.title = element_text(face = "bold", hjust = 0.5, size = 8),
       plot.subtitle = element_text(hjust = 0.5)
@@ -1003,7 +1012,6 @@ get_robustnesssplots <- function(dataframe, outcome, estimate_type = 1, include_
 
 # Create list of dataframes with their names
 dataframes <- list(
-  "Full Sample" = df,
   "Independents" = df_independents,
   "Republicans" = df_republicans
 )

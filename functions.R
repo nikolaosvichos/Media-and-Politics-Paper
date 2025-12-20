@@ -1,26 +1,44 @@
+library(styler)
+library(psych)
+library(dplyr)
+library(tidyverse)
+library(scales)
+library(rdrobust)
+library(modelsummary)
+library(ggthemes)
+library(patchwork)
+library(tibble)
+library(knitr)
+library(ggtext)
+
+
 ####################################
 ########## Plot Functions ##########
 ####################################
-
 
 
 ##### Scree-plot function #####
 
 get_screeplot <- function(outcome, outcomename) {
   plot(1:length(outcome$values), outcome$values,
-       type = "b",
-       ylab = "Eigenvalue", xlab = "Factor", main = paste("Scree plot —", outcomename)
+    type = "b",
+    ylab = "Eigenvalue", xlab = "Factor", main = paste("Scree plot —", outcomename)
   )
 }
 
 
-##### Define function for coefplots ##### 
+##### Define function for coefplots #####
 
 get_coefplot <- function(dataframe, colnumber = 3) {
-  ggplot(dataframe, aes(y = Sample, x = Estimate, color = Model)) +
+  dataframe <- dataframe %>%
+    mutate(
+      Estimate_Inverse = -Estimate
+    )
+
+  ggplot(dataframe, aes(y = Sample, x = Estimate_Inverse, color = Model)) +
     geom_point(position = position_dodge(width = 0.6), size = 2.5) +
     geom_errorbarh(
-      aes(xmin = Estimate - 1.96 * SE, xmax = Estimate + 1.96 * SE),
+      aes(xmin = Estimate_Inverse - 1.96 * SE, xmax = Estimate_Inverse + 1.96 * SE),
       height = 0.25,
       position = position_dodge(width = 0.6)
     ) +
@@ -37,14 +55,127 @@ get_coefplot <- function(dataframe, colnumber = 3) {
     theme(
       plot.title = element_text(face = "bold", hjust = 0.5),
       plot.subtitle = element_text(hjust = 0.5),
-      legend.position = "bottom"
+      legend.position = "bottom",
+      plot.caption = ggtext::element_markdown()
     ) +
     facet_wrap(~Outcome, ncol = colnumber)
 }
 
 
-##### Define function for discontinuity plots #####
-get_discontinuityplot <- function(dataframe, subset, primary_only = TRUE, colnumber = 3) { # arguments:
+##### Define function for discontinuity plots for single outcome #####
+get_discontinuityplot <- function(dataframe, outcome = "media_index", outcome_name = "Media Attitudes", colnumber = 2) { # arguments:
+  # dataframe
+  # the outcome of interest (specific index)
+  # a string referring to the outcome name to be printed
+  # number of columns
+
+  dataframe <- dataframe %>%
+    filter(age <= 60, !is.na(party))
+
+  df_all <- dataframe %>% # republicans, democrats, independents
+    mutate(
+      subgroup = case_when(
+        party == 1 ~ "Democrats",
+        party == 2 ~ "Republicans",
+        party == 3 ~ "Independents"
+      )
+    )
+
+  df_partisans <- dataframe %>% # partisans subset
+    filter(party %in% c(1, 2)) %>%
+    mutate(
+      subgroup = "Partisans"
+    )
+
+
+  df_plot <- bind_rows(
+    df_all,
+    df_partisans
+  ) %>%
+    filter(age <= 60, !is.na(.data[[outcome]]), !is.na(subgroup)) %>%
+    mutate(subgroup = factor(
+      subgroup,
+      levels = c(
+        "Independents",
+        "Partisans",
+        "Democrats",
+        "Republicans"
+      )
+    ))
+
+
+  # Now plot the grid #
+  plot_subgroups <- ggplot(df_plot, aes(x = age, y = .data[[outcome]], color = factor(treatment))) +
+    geom_point(alpha = 0.5) +
+    geom_smooth(
+      aes(group = factor(treatment)),
+      method = "lm",
+      formula = y ~ poly(x, 1),
+      se = TRUE,
+      color = "black",
+      alpha = 0.75
+    ) +
+    geom_vline(xintercept = 26, linetype = "dashed", color = "black") +
+    scale_color_brewer(
+      palette = "Dark2",
+      name = "2012 Voting Eligibility",
+      labels = c("Not Eligible (<26)", "Eligible (≥26)")
+    ) +
+    labs(
+      x = "Age in 2020",
+      y = NULL,
+      title = paste("Discontinuities in", outcome_name),
+      subtitle = paste("Among Different Partisanship Categories")
+    ) +
+    theme_bw() +
+    theme(
+      legend.position = "bottom",
+      plot.title = element_text(face = "bold", hjust = 0.5),
+      plot.subtitle = element_text(hjust = 0.5)
+    ) +
+    facet_wrap(~subgroup, scales = "free_y", ncol = colnumber)
+
+
+  plot_all <- ggplot(dataframe, aes(x = age, y = .data[[outcome]], color = factor(treatment))) +
+    geom_point(alpha = 0.5) +
+    geom_smooth(
+      aes(group = factor(treatment)),
+      method = "lm",
+      formula = y ~ poly(x, 1),
+      se = TRUE,
+      color = "black",
+      alpha = 0.75
+    ) +
+    geom_vline(xintercept = 26, linetype = "dashed", color = "black") +
+    scale_color_brewer(
+      palette = "Dark2",
+      name = "2012 Voting Eligibility",
+      labels = c("Not Eligible (<26)", "Eligible (≥26)")
+    ) +
+    labs(
+      x = "Age in 2020",
+      y = NULL,
+      title = paste("Discontinuities in", outcome_name),
+      subtitle = paste("Independents, Democrats, and Republicans (Full Sample)")
+    ) +
+    theme_bw() +
+    theme(
+      legend.position = "bottom",
+      plot.title = element_text(face = "bold", hjust = 0.5),
+      plot.subtitle = element_text(hjust = 0.5)
+    )
+
+
+  plots <- list(
+    plot_all = plot_all,
+    plot_subgroups = plot_subgroups
+  )
+}
+
+
+##### Define function for discontinuity plots for multiple outcomes but one subgroup #####
+
+get_discontinuityplot_multipleoutcomes <- function(dataframe, subset, primary_only = TRUE, colnumber = 3) { # arguments:
   # dataframe referring to the specific subset,
   # a string identifying the subset, and column numbers
   # primary outcomes or include traditionalism too
@@ -52,7 +183,7 @@ get_discontinuityplot <- function(dataframe, subset, primary_only = TRUE, colnum
   df_long <- dataframe %>%
     filter(age <= 60) %>%
     pivot_longer(
-      cols = c(media_index),
+      cols = c(populism_index, authoritarianism_index, nativism_index, traditionalism_index),
       names_to = "Outcome",
       values_to = "Value"
     ) %>%
@@ -60,22 +191,26 @@ get_discontinuityplot <- function(dataframe, subset, primary_only = TRUE, colnum
     mutate(
       Outcome = recode(
         Outcome,
-        media_index = "Media Attitudes",
+        populism_index = "Populism",
+        authoritarianism_index = "Authoritarianism",
+        nativism_index = "Nativism",
+        traditionalism_index = "Traditionalism"
       ),
       Outcome = factor(
         Outcome,
         levels = c(
-          "Media Attitudes"
+          "Nativism", "Authoritarianism",
+          "Populism", "Traditionalism"
         )
-      )
+      ),
     )
-  
-  # NOT APPLICABLE TO THIS PROJECT Check whether only primary variables should be kept
-  # if (primary_only) {
-  #   df_long <- df_long %>%
-  #     filter(Outcome == "Populism" | Outcome == "Authoritarianism" | Outcome == "Nativism")
-  # }
-  
+
+  # Check whether only primary variables should be kept
+  if (primary_only) {
+    df_long <- df_long %>%
+      filter(Outcome == "Populism" | Outcome == "Authoritarianism" | Outcome == "Nativism")
+  }
+
   # Now do the plotting
   ggplot(df_long, aes(x = age, y = Value, color = factor(treatment))) +
     geom_point(alpha = 0.5) +
@@ -96,8 +231,8 @@ get_discontinuityplot <- function(dataframe, subset, primary_only = TRUE, colnum
     labs(
       x = "Age in 2020",
       y = NULL,
-      title = paste("Discontinuities in Media Attitudes Among", subset),
-      subtitle = paste(subset)
+      title = paste("Discontinuities in Radical Right Attitudes Among", subset),
+      subtitle = "Across Multiple Outcomes"
     ) +
     theme_bw() +
     theme(
@@ -114,7 +249,7 @@ get_discontinuityplot <- function(dataframe, subset, primary_only = TRUE, colnum
 ####################################
 
 
-#####  Function that extracts the core values as a table to easily look at them ##### 
+#####  Function that extracts the core values as a table to easily look at them #####
 extract_rdd_summary <- function(rd_object, model_label = "Model") {
   # Extract core values
   coef <- rd_object$coef[2]
@@ -125,7 +260,7 @@ extract_rdd_summary <- function(rd_object, model_label = "Model") {
   bw_value <- rd_object$bws[1]
   n_below <- rd_object$N_h[1]
   n_above <- rd_object$N_h[2]
-  
+
   # # Significance stars
   # stars <- case_when(
   #   pval < 0.001 ~ "***",
@@ -133,7 +268,7 @@ extract_rdd_summary <- function(rd_object, model_label = "Model") {
   #   pval < 0.05 ~ "*",
   #   TRUE ~ ""
   # )
-  
+
   # Output as a table
   tibble(
     `Model` = model_label,
@@ -147,12 +282,12 @@ extract_rdd_summary <- function(rd_object, model_label = "Model") {
 }
 
 
-#####  Function that utilizes the function above and the existing rd_robust function to run the models ##### 
+#####  Function that utilizes the function above and the existing rd_robust function to run the models #####
 run_rdd_models <- function(data, index_var, controls, sample_label) {
   # Extract outcome + running variable
   y <- data[[index_var]]
   x <- data$age
-  
+
   # --- Simple RDD model ---
   rdd_simple <- rdrobust(
     y = y,
@@ -164,10 +299,10 @@ run_rdd_models <- function(data, index_var, controls, sample_label) {
     rdd_simple,
     model_label = "Without Controls"
   )
-  
+
   # --- Controls RDD model ---
   covs <- data[, controls, drop = FALSE]
-  
+
   rdd_controls <- rdrobust(
     y = y,
     x = x,
@@ -179,7 +314,7 @@ run_rdd_models <- function(data, index_var, controls, sample_label) {
     rdd_controls,
     model_label = "With Controls"
   )
-  
+
   # Add sample label and return combined results
   bind_rows(summary_simple, summary_controls) %>%
     dplyr::mutate(Sample = sample_label, .before = 1)

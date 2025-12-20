@@ -21,6 +21,7 @@ library(ggthemes)
 library(patchwork)
 library(tibble)
 library(knitr)
+library(ggtext)
 
 # Get functions
 source("functions.R")
@@ -401,7 +402,7 @@ df <- df_unstandardized
 
 # standardize the relevant items used to construct the index
 media_items <- c( # select the relevant items
-  "free_press", "media_trust", "media_undermined_concern", "journalist_access"
+  "free_press", "media_undermined_concern", "journalist_access"
 )
 
 df[, media_items] <- scale(df[, media_items]) # standardize them
@@ -521,71 +522,23 @@ rdd_media <- bind_rows(rdd_media_full, rdd_media_independents, rdd_media_partisa
 ######################################################################################################################
 
 
-###################################
-######## Coefficient Plots ########
-###################################
-
-
-#### Define function for coefplots ####
-
-get_coefplot <- function(dataframe, colnumber = 3) {
-  ggplot(dataframe, aes(y = Sample, x = Estimate, color = Model)) +
-    geom_point(position = position_dodge(width = 0.6), size = 2.5) +
-    geom_errorbarh(
-      aes(xmin = Estimate - 1.96 * SE, xmax = Estimate + 1.96 * SE),
-      height = 0.25,
-      position = position_dodge(width = 0.6)
-    ) +
-    geom_vline(xintercept = 0, linetype = "dashed", color = "gray40") +
-    scale_color_manual(values = c("orange2", "orchid4")) +
-    labs(
-      title = "Estimated RD Effects Across Outcomes",
-      subtitle = "Bias-Adjusted Estimates",
-      x = "Estimated RD Effect",
-      y = NULL,
-      color = "Model"
-    ) +
-    theme_bw() +
-    theme(
-      plot.title = element_text(face = "bold", hjust = 0.5),
-      plot.subtitle = element_text(hjust = 0.5),
-      legend.position = "bottom"
-    ) +
-    facet_wrap(~Outcome, ncol = colnumber)
-}
 
 #### Get coefficient plots for the different outcome variables ####
 coefplot_media <- get_coefplot(rdd_media, 1)
 
 
-#####################################
-######## Discontinuity Plots ########
-#####################################
-
-
-#### Get discontinuity plots plots for the different subgroups ####
-
+#### Get discontinuity plots plots for the different subgroups and full group ####
 # full sample
-discontinuityplot_all <- get_discontinuityplot(df, "All Respondents", primary_only = TRUE)
+discontinuityplot <- get_discontinuityplot(df)
 
-# independents
-discontinuityplot_independents <- get_discontinuityplot(df_independents, "Independents")
 
-# partisans
-discontinuityplot_partisans <- get_discontinuityplot(df_partisans, "Partisans")
 
-# democrats
-discontinuityplot_democrats <- get_discontinuityplot(df_democrats, "Democrats")
-
-# republicans
-discontinuityplot_republicans <- get_discontinuityplot(df_republicans, "Republicans")
-
-# Display plots
-discontinuityplot_all
-discontinuityplot_partisans
-discontinuityplot_independents
-discontinuityplot_democrats
-discontinuityplot_republicans
+#### Display plots #### 
 coefplot_media
+discontinuityplot$plot_all
+discontinuityplot$plot_subgroups
+
+
+
 
 

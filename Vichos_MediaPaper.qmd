@@ -1,7 +1,7 @@
 ---
 title: "Coming of Age Under Trump"
-subtitle: "The Effect of First Electoral Exposure in a Trump Election on Long-Term Support for Radical Right Attitudes"
-date: today
+subtitle: "The Effect of First Electoral Exposure in a Trump Election on Long-Term Support for Liberal Democratic Protections of Media Freedom"
+date: 12/20/2025
 date-format: long
 author:
   - name: "Nikolaos Vichos"
@@ -14,7 +14,7 @@ table-placement: default
 #     name: Centre for European Studies and Comparative Politics, CNRS, Sciences Po, Paris, France.
 abstract: |
   \begin{spacing}{0.95}
-  How do early political experiences during moments of democratic strain shape long-term support for radical-right attitudes? This paper examines whether coming of age politically in the context of the 2016 Trump election—characterized by nativist, authoritarian, and populist cues—durably alters individuals’ ideological trajectories. Using a sharp regression discontinuity design (RDD), I compare Americans whose first eligible presidential election was 2012 to those whose first eligible election was 2016, leveraging the age-based cutoff in the 2020 ANES. The regression discontinuity (RD) results reveal little evidence of the predicted effects and where, effects do appear, they run largely counter to expectations. Across most subgroups, there is no detectable shift in support for nativist, authoritarian, or populist attitudes. The few significant estimates point in the opposite direction: individuals first eligible to vote in 2016 tend to express lower, not higher, support for radical-right attitudes, particularly among Republicans and the full sample. Independents show a modest increase in authoritarianism, but this pattern is small, inconsistent, and sensitive to model specification. Taken together, the results suggest a partisan asymmetry that contradicts standard accounts of radical-right mobilization, raising the possibility that early exposure to Trump’s norm-breaking campaign may have triggered a form of resistance or retrospective distancing rather than ideological adoption. These findings provide new insight into how political generations are formed under disruptive conditions while raising broader questions about the fragility and conditionality of democratic commitments in the electorate.
+  How do early political experiences during moments of democratic strain shape long-term attitudes toward liberal democratic protections of media freedom (media attitudes)? This paper examines whether coming of age politically in the context of the 2016 Trump election—characterized by persistent attacks against the press—durably alters individuals’ attitudinal trajectories. Using a sharp regression discontinuity design (RDD), I compare Americans whose first eligible presidential election was 2012 to those whose first eligible election was 2016, leveraging the age-based cutoff in the 2020 ANES. The regression discontinuity (RD) results reveal little evidence of the predicted effects and, where effects do appear, they run largely counter to expectations. Across most subgroups, there is no detectable shift in media attitudes. The few significant estimates point in the opposite direction: Republicans first eligible to vote in 2016 expressed more positive media attitudes, whereas the inverse was true among independents. Taken together, the results raise the possibility that early exposure to Trump’s norm-breaking campaign may have triggered a form of resistance or retrospective distancing rather than ideological adoption that was contingent on political engagement. These findings provide new insight into how political generations are formed under disruptive conditions while raising broader questions about the fragility and conditionality of democratic commitments in the electorate.
   \end{spacing}
 
 filters:
@@ -59,6 +59,14 @@ number-depth: 4
 
 ## Author: Nikolaos VICHOS
 
+#########################################################################
+#########################################################################
+############# Replication Code: "Coming of Age Under Trump" #############
+########### The Effect of First Electoral Exposure in a Trump ###########
+################# Election on Long-Term Media Attitudes #################
+#########################################################################
+#########################################################################
+
 
 ### Set-Up
 library(styler)
@@ -72,6 +80,7 @@ library(ggthemes)
 library(patchwork)
 library(tibble)
 library(knitr)
+library(ggtext)
 
 # Get functions
 source("functions.R")
@@ -516,7 +525,7 @@ df_democrats <- df %>% # democrats subset
   filter(party == 1)
 
 df_republicans <- df %>% # republicans subset
-  filter(party == 2) 
+  filter(party == 2)
 
 
 # Media Attitude models
@@ -572,64 +581,16 @@ rdd_media <- bind_rows(rdd_media_full, rdd_media_independents, rdd_media_partisa
 ######################################################################################################################
 
 
-###################################
-######## Coefficient Plots ########
-###################################
-
-
-#### Define function for coefplots ####
-
-get_coefplot <- function(dataframe, colnumber = 3) {
-  ggplot(dataframe, aes(y = Sample, x = Estimate, color = Model)) +
-    geom_point(position = position_dodge(width = 0.6), size = 2.5) +
-    geom_errorbarh(
-      aes(xmin = Estimate - 1.96 * SE, xmax = Estimate + 1.96 * SE),
-      height = 0.25,
-      position = position_dodge(width = 0.6)
-    ) +
-    geom_vline(xintercept = 0, linetype = "dashed", color = "gray40") +
-    scale_color_manual(values = c("orange2", "orchid4")) +
-    labs(
-      title = "Estimated RD Effects Across Outcomes",
-      subtitle = "Bias-Adjusted Estimates",
-      x = "Estimated RD Effect",
-      y = NULL,
-      color = "Model"
-    ) +
-    theme_bw() +
-    theme(
-      plot.title = element_text(face = "bold", hjust = 0.5),
-      plot.subtitle = element_text(hjust = 0.5),
-      legend.position = "bottom"
-    ) +
-    facet_wrap(~Outcome, ncol = colnumber)
-}
 
 #### Get coefficient plots for the different outcome variables ####
 coefplot_media <- get_coefplot(rdd_media, 1)
 
 
-#####################################
-######## Discontinuity Plots ########
-#####################################
-
-
-#### Get discontinuity plots plots for the different subgroups ####
-
+#### Get discontinuity plots plots for the different subgroups and full group ####
 # full sample
-discontinuityplot_all <- get_discontinuityplot(df, "All Respondents", primary_only = TRUE)
+discontinuityplot <- get_discontinuityplot(df)
 
-# independents
-discontinuityplot_independents <- get_discontinuityplot(df_independents, "Independents")
 
-# partisans
-discontinuityplot_partisans <- get_discontinuityplot(df_partisans, "Partisans")
-
-# democrats
-discontinuityplot_democrats <- get_discontinuityplot(df_democrats, "Democrats")
-
-# republicans
-discontinuityplot_republicans <- get_discontinuityplot(df_republicans, "Republicans")
 ```
 
 \pagenumbering{gobble}
@@ -648,83 +609,79 @@ discontinuityplot_republicans <- get_discontinuityplot(df_republicans, "Republic
 
 # **Introduction**
 
-The 2016 U.S. presidential election marked a rupture in American political life. Supporters chanted “Lock her up!” as protestors were forcibly removed from rallies, while not only political opponents but also journalists and the media were routinely framed as enemies of the people. For many young voters, this was their first political memory as adults. If early political experiences are formative, what are the downstream consequences of coming of age during an election defined by persistent attacks against the liberal democratic values protecting media freedom? This leads to the central question of this paper:
+The 2016 U.S. presidential election marked a rupture in American political life. Supporters chanted “Lock her up!” as protestors were forcibly removed from rallies, while journalists and the media were routinely framed as enemies of the people. For many young voters, this was their first political memory as adults. If early political experiences are formative, what are the downstream consequences of coming of age during an election defined by persistent attacks against the liberal democratic media protections? This leads to the central question of this paper:
 
 \begin{adjustwidth}{1em}{1em}
-\emph{Does entering political life during a disruptive and polarizing election shape long-term support for liberal democratic attitudes toward media freedom?}
+\emph{Does entering political life during a disruptive and polarizing election shape long-term attitudes toward liberal democratic protections of media freedom?}
 \end{adjustwidth}
 
 To answer this question, I use a sharp regression discontinuity design (RDD) leveraging the age-based cutoff for voting eligibility in the 2012 and 2016 presidential elections. By comparing individuals just eligible to vote in 2012 with those just eligible in 2016, I isolate the causal effect of entering the electorate during a conventional electoral context versus one characterized by intensified rhetoric against freedom of the press.
 
-> Across most subgroups, the regression discontinuity estimates show no evidence that first-time exposure to the 2016 election increased support for radical-right attitudes. Where significant effects do appear, they point in the opposite direction: Republicans and the full sample exhibit *lower* levels of nativism and authoritarianism, while independents show only a small, non-robust increase in authoritarianism. Overall, the results run counter to prevailing expectations about impressionable-years sensitivity to radical-right cues.
+Across most partisanship-based subgroups, the results show no evidence that first-time exposure to the 2016 election increased hostility toward liberal protections of media freedom. Where significant effects do appear, they point in the opposite direction: Republicans exhibit *lower* levels of hostility, whereas the inverse is true for independents. Overall, the results run counter to prevailing expectations about impressionable-years sensitivity to elite cues.
 
 ## Importance
 
-> Understanding whether and how liberal democratic values protecting media freedom (hereinafter referred to as 'media attitudes'), defined here as the combination of nativist, authoritarian, and populist attitudes, might take root is central to assessing the long-term resilience of liberal democracy. Young voters are particularly receptive to their political environment when they first engage with democratic institution; early adulthood thus exerts disproportionate influence on long-term political attitudes and behaviors [@jennings2014; @ghitza2023]. Therefore, studying how this cohort responds to periods of elite norm violation can offer critical insights into the conditions under which radical-right attitudes can emerge and an erosion of democratic attitudes might gain traction.
+Understanding whether and how attitudes toward liberal democratic protections of media freedom (hereinafter referred to as 'media attitudes') might take root is central to assessing the long-term resilience of liberal democracy. Young voters are particularly receptive to their political environment when they first engage with democratic institutions; early adulthood thus exerts disproportionate influence on long-term political attitudes and behaviors [@jennings2014; @ghitza2023]. Therefore, studying how this cohort responds to periods of elite norm violation can offer critical insights into the conditions under which hostile media attitudes can emerge and an erosion of democratic norms against the 'fourth branch' of government might gain traction.
 
-This study can also contribute to understanding the 'stickiness' of elite cues during early adulthood. Such top-down cues play a central role in shaping how citizens interpret political conflict, particularly when elites signal that violations of democratic norms are permissible or necessary [@druckman2024; @clayton2021]. Although such cues influence the public broadly, their impact might be amplified among young adults. Their heightened sensitivity to their political context makes early adulthood a critical window for understanding how exposure to elite norm breaking may anchor long-term orientations toward radical-right attitudes.
+This study can also contribute to understanding the 'stickiness' of elite cues during early adulthood. Such top-down cues play a central role in shaping how citizens interpret political conflict, particularly when elites signal that violations of democratic norms are permissible or necessary [@druckman2024; @clayton2021]. Although such cues influence the public broadly, their impact might be amplified among young adults. Their heightened sensitivity to their political context makes early adulthood a critical window for understanding how exposure to elite norm breaking may anchor long-term orientations toward hostile media attitudes.
 
-Finally, the importance of this study extends beyond academia: if exposure to norm violations during early adulthood can strengthen support for radical-right attitudes and weaken democratic commitments, the long-term costs of elite transgression may be generational as well as institutional. Democratic erosion might thus unfold subtly, through shifts in what young citizens come to view as acceptable in a democracy. If radical-right attitudes take root precisely when political identities are forming, the effects may endure long after the precipitating crisis has passed. This possibility raises the question of whether democracy can survive if its newest citizens come of age during moments of radical-right.
+Finally, the importance of this study extends beyond academia: if exposure to norm violations during early adulthood can lead to hostile media attitudes and weakened democratic commitments, the long-term costs of elite transgression may be generational as well as institutional. Democratic backsliding might thus unfold subtly, through shifts in what young citizens come to view as acceptable in a democracy. If such attitudes take root precisely when political identities are forming, the effects may endure long after the precipitating crisis has passed. This possibility raises the question of whether democracy can survive if its newest citizens come of age during moments of elite norm violation.
 
 # Literature Review
 
-This paper draws on two strands of literature to examine how coming of age under a norm-breaking election may shape support for radical-right attitudes. The first explores how early adulthood functions as a sensitive period for political and civic development, with political attitudes and behaviors formed during this time often persisting throughout adulthood. Within that context, first-time electoral experiences play a notable role, forming durable patterns of engagement. Secondly, recent research on democratic backsliding highlights the importance of elite cues in shaping public attitudes and commitments to democratic norms, particularly within the Trump context. Taken together, these strands provide a framework for analyzing how exposure to the 2016 Trump election may have affected the political development of young voters.
+This paper draws on two strands of literature to examine how coming of age under a norm-breaking election may shape long-term media attitudes. The first explores how early adulthood functions as a sensitive period for political and civic development, with political attitudes and behaviors formed during this time often persisting throughout adulthood. Secondly, recent research on democratic backsliding highlights the importance of elite cues in shaping public attitudes and commitments to democratic norms. Taken together, these strands provide a framework for analyzing how exposure to the 2016 Trump election may have affected the political development of young voters.
 
 ## Early Adulthood and Future Political Behavior
 
-Existing research has underscored the enduring impact of childhood and early adulthood on later-life outcomes: one of the main domains in which this is most evident is political behavior.
+Existing research has underscored the enduring impact of childhood and early adulthood on later-life outcomes: one of the main domains in which this is most evident is political attitudes.
 
-@mannheim1928 introduces the concept of 'fresh contact,' arguing that initial encounters with political authority and conflict during this time help crystallize lasting political worldviews. Recent empirical work supports this idea. @neundorf2013 use German panel data to show that political interest develops most dynamically during adolescence and early adulthood, stabilizing around age 25. Similarly, @dinas2013, studying reactions to the Watergate scandal, finds that young adults adjust their political evaluations more flexibly than older cohorts by placing less weight on prior attitudes, suggesting an openness to new information.
+@mannheim1928 introduces the concept of 'fresh contact,' arguing that initial encounters with political authority and conflict during this time help crystallize lasting political worldviews. Recent empirical work supports this idea: @neundorf2013 use German panel data to show that political interest develops most dynamically during adolescence and early adulthood, stabilizing around age 25. Similarly, @dinas2013, studying reactions to the Watergate scandal, finds that young adults adjust their political evaluations more flexibly than older cohorts by placing less weight on prior attitudes, suggesting an openness to new information.
 
 A related line of research explores how generations differ in their long-term political behavior based on when they came of age. @ghitza2023 find that political preferences are largely shaped by events encountered between ages 14 and 24, and that cohort-defining moments like the Kennedy, Reagan, or Trump years create stable partisan divides. Longitudinal data confirm that political orientations established in this period often endure: @jennings2014, drawing on decades of panel data, find that attitudes formed in early adulthood tend to persist across life, especially for individuals who engaged politically early on.
 
-### First Electoral Experiences
-
 One of the clearest applications of the formative nature of early adulthood lies in the act of voting for the first time. @dinas2012 finds that voting in a first election increases the likelihood of voting in subsequent elections, even decades later. This finding is echoed by @franklin2004 , who argues that the overall 'salience' of a young person’s first election (whether it begins with a high- or low-turnout context) leaves a footprint in their participation trajectory. These findings reinforce the idea that initial political experiences, like exposure to and participation in salient elections, become reference points that influence later engagement.
 
-Taken together, this literature positions early adulthood as a formative and fragile window, where social contexts and political experience leave lasting marks on civic behavior. Nevertheless, less is known about how this sensitivity interacts with moments of democratic crisis, particularly those marked by surges in nativist, authoritarian, and populist rhetoric. This paper contributes to this literature by examining whether coming of age during a period marked by institutional conflict and democratic norm erosion shapes long-term support for radical right attitudes. In doing so, it connects theories of developmental susceptibility with contemporary concerns about democratic backsliding and elite norm violation.
+Taken together, this literature positions early adulthood as a formative and fragile window, where social contexts and political experience leave lasting marks on civic behavior. Nevertheless, less is known about how this sensitivity interacts with moments of crisis. This paper contributes to this literature by examining whether coming of age during a period marked by elite violations of liberal democratic norms toward media freedom shapes long-term media attitudes. In doing so, it connects theories of developmental susceptibility with contemporary concerns about democratic backsliding.
 
-## Trump 2016 and the Trickling-Down of Radical-Right Attitudes
+## Trump 2016 and the Trickling-Down of Media Attitudes
 
 The 2016 U.S. presidential election marked an important rupture, both in tone and behavior, that distinguished it sharply from previous elections. In addition to being "one of the most polarizing elections in U.S. history", pitting two extremely ideologically opposed candidates, the 2016 election also stands out particularly due to candidacy of Donald Trump [@bekafigo2019].
 
-### A radical-right candidacy?
+### Trump and the media
 
-Trump's campaign style was in many ways unprecedented. His political strategy heavily depended on activating deep-rooted anxieties: rather than tempering the Party’s message to appeal to broader electorates, Trump positioned himself against both party elites and marginalized groups, embracing anti-immigration rhetoric and rejecting political correctness.
-
-> Most importantly for the purposes of this paper, his campaign was characterized by a stark presence of nativist, authoritarian, and populist ideology. Existing work by @cremer2023 highlights this, detailing how Trump's campaign combined these three elements, as exemplified through slogans such as "build the wall" or "drain the swamp". Interestingly, these ideological features were also present on the demand-side: @knuckey2022 find that authoritarian predispositions were powerful predictors of white vote choice in 2016. Authoritarianism exerted a stronger influence in the 2016 presidential than in any prior election, including the 2016 House election, suggesting that Trump’s campaign style served as a triggering mechanism.
+Trump's campaign style was—and still is—in many ways unprecedented. Most importantly for the purposes of this paper, his 2016 campaign was characterized by systematic attacks on the news media as a core democratic institution. Through an extensive content analysis of Trump’s Twitter activity, @meeks2020 shows that Trump attacked non-conservative and mainstream media using attack and bias frames. These attacks generated particularly high levels of engagement, suggesting strong resonance among his supporters. Such rhetoric targeted the media not merely as political adversaries but as enemies of the people, thereby undermining the liberal democratic norm of an independent press [@kenny2020].
 
 ### Elite cues and anti-democratic attitudes
 
-While the 2016 election marked a clear breach in elite behavior, the broader effects of this rupture also depend on how citizens respond. Findings from the literature on democratic erosion suggest that elite norm violations can destabilize democratic institutions. Citizens rarely act as the first movers in democratic erosion; they respond to elite behaviors, internalizing their cues about what is politically permissible or necessary.
+While the 2016 election marked a clear breach in elite behavior, the broader effects of this rupture also depend on how citizens respond. Findings from the literature on democratic erosion suggest that elite norm violations can destabilize democratic institutions. Elites are uniquely positioned to violate norms, often under the guise of defending democracy itself whereas citizens function as latent legitimators, responding to elite behavior and helping either to normalize or resist democratic erosion [@druckman2024].
 
-@druckman2024 offers a comprehensive framework for understanding how democratic backsliding unfolds through the interaction of elites, societal actors, and citizens. Elites are uniquely positioned to violate laws and norms, often under the guise of defending democracy itself, while also making decisions with an eye toward how the public will respond. Thus, in Druckman's view, citizens function as latent legitimators, responding to elite behavior and helping either to normalize or resist democratic erosion. Similarly, @clayton2021 use a panel survey experiment to examine the effect of exposure to Trump's statements questioning the results of the 2020 presidential election. Their finding that exposure to these statements eroded trust in the election's legitimacy and decreased confidence in elections among his supporters broadly suggest that anti-democratic elite cues can 'trickle-down,' impacting public attitudes toward democratic norms.
+This is corroborated by empirical findings. Using a panel survey experiment, @clayton2021 examine the effect of exposure to Trump's statements questioning the results of the 2020 presidential election and find that exposure to these statements eroded trust in the election's legitimacy among his supporters. This suggests that anti-democratic elite cues can 'trickle-down,' impacting public attitudes toward democratic norms. Focusing specifically on the media, @smith2010 shows that elite attacks against the media, regardless of partisanship or timing relative to news exposure, systematically increase citizens’ perceptions of media bias, benefiting political elites while weakening democratic accountability.
 
-This study builds on these insights by asking how the 2016 shift in elite rhetoric affected young voters who came of age during this period. While existing work documents the democratic consequences of Trump’s presidency, less is known about how exposure to this political moment shaped long-term political development. This paper addresses that gap by examining whether coming of age under Trump altered long-term radical-right attitudes.
+This study builds on these insights: while existing work documents the democratic consequences of Trump’s presidency, less is known about how exposure to this political moment shaped long-term political development. This paper addresses that gap by examining whether coming of age under Trump altered long-term media attitudes.
 
 ## Theory and Hypotheses
 
-Building on these insights, this section introduces this paper's theoretical framework and hypotheses. It outlines how early political socialization, partisan sensitivity, and the ideologically asymmetric effects of political context shape long-term liberal democratic attitudes.
+Building on these insights, I introduce my theoretical framework and hypotheses outlining how early political socialization, partisan sensitivity, and the ideologically asymmetric effects of political context shape long-term liberal democratic attitudes.
 
 ### H1: First-Time Sensitivity
 
-Clearly, early adulthood is politically formative: experiences during this period can leave long-lasting marks on political behavior. This paper applies this logic to the context of the 2016 presidential election; unlike earlier cohorts, first-time voters in 2016 'came of age' politically during a time characterized by norm-breaking elite rhetoric, defined by the presence of nativist, authoritarian, and populist features. Given the norm-eroding context, I argue that the process of attitude formation becomes distorted at the moment it is most sticky.
+Early adulthood is politically formative, as experiences during this period can leave long-lasting marks on political behavior. This paper applies this logic to the context of the 2016 presidential election; unlike earlier cohorts, first-time voters in 2016 'came of age' politically during a time characterized by norm-breaking elite rhetoric like hostile media attitudes. Given this norm-eroding context, I argue that the process of attitude formation becomes distorted at the moment it is most sticky.
 
 This leads to the central claim tested in this study, reflecting both the sensitivity of early political experiences and the unique nature of the 2016 election:[^1]
 
-[^1]: "Positive effect" refers to an increase in support
+[^1]: A negative effect indicates a *decrease* in support for liberal democratic protections of the media among those eligible to vote for the first time in *2016,* compared to those eligible in 2012.
 
 \begin{adjustwidth}{1em}{1em}
-\emph{H1: Being a first-time voter in the 2016 election will have a positive effect on long-term support for radical-right attitudes ('first-time sensitivity' hypothesis).}
+\emph{H1: Being first eligible to vote in the 2016 U.S. presidenial election will have a negative effect on long-term media attitudes ('first-time sensitivity' hypothesis).}
 \end{adjustwidth}
 
 ### H2: Non-Partisan Insensitivity
 
-A growing body of research suggests that political partisanship shapes how individuals interpret and respond to their political environment. Whereas partisan identifiers, especially strong ones, tend to be more psychologically and behaviorally sensitive to political stimuli, self-identified independents are generally less responsive.
+Existing research suggests that political partisanship shapes how individuals interpret and respond to their political environment. Whereas partisan identifiers, especially strong ones, tend to be more psychologically and behaviorally sensitive to political stimuli, self-identified independents are generally less responsive.
 
 @mandel2014 find that partisans report higher life satisfaction under favorable political conditions and lower satisfaction under unfavorable ones, while independents express intermediate levels. This 'favorability effect' suggests that partisans are more emotionally attuned to political developments whereas independents are less susceptible to affective spillover from the political context. In terms of political behavior, @magleby2011 find that independents vote at significantly lower rates than partisans. This turnout gap—nearly 20 percentage points in the 2008 election—suggests lower overall political involvement.
 
-These findings suggest that independents are less likely to internalize elite cues associated with polarized political contexts and thus may have been less susceptible to the cues of the 2016 Trump campaign. This leads to my second hypothesis:
+These findings suggest that independents are less likely to internalize elite cues associated with polarized political contexts and thus may have been less susceptible to the Trump's cues. This leads to my second hypothesis:
 
 \begin{adjustwidth}{1em}{1em}
 \emph{H2: The effect will be stronger among partisans (Republicans or Democrats) than among independents ('non-partisan insensitivity' hypothesis).}
@@ -734,9 +691,9 @@ These findings suggest that independents are less likely to internalize elite cu
 
 My final hypothesis builds on the “asymmetric sensitivity” hypothesis proposed @mandel2014, positing that Republicans are more affectively responsive to their political environment than Democrats: their retrospective and prospective well-being was more strongly conditioned by whether the political environment was favorable or not. Democrats, by contrast, were less reactive.
 
-This pattern is consistent with research showing that conservatives are more likely to attend to, and be affected by, affectively charged or threatening information. For example, @joel2014 find that conservatives not only anticipate stronger emotional reactions to negative outcomes but also report experiencing them more intensely.
+This pattern is consistent with research showing that conservatives are more likely to attend to and be affected by charged or threatening information. For example, @joel2014 find that conservatives not only anticipate stronger emotional reactions to negative outcomes but also report experiencing them more intensely.
 
-These findings, in addition to the fact that the radical-right elite cues came primarily from the Republican side imply that Republican first-time voters may have been more deeply affected by the political context of 2016 and, rather than resisting Trump's radical-right cues, they may have internalized them as acceptable [@cremer2023; @knuckey2022] . This leads to my final hypothesis:
+These findings, in addition to the fact that the elite cues of hostility toward liberal democratic protections of the media came primarily from the Republican side, imply that Republican first-time voters may have been more deeply affected by the political context of 2016. Rather than resisting Trump's anti-media cues, they may have internalized them as acceptable [@cremer2023; @knuckey2022]. This leads to my final hypothesis:
 
 \begin{adjustwidth}{1em}{1em}
 \emph{H3: Among partisans, the effect will be stronger among Republicans ('asymmetric sensitivity' hypothesis).}
@@ -744,58 +701,89 @@ These findings, in addition to the fact that the radical-right elite cues came p
 
 # Research Design
 
-This study uses a sharp RDD to identify the long-term causal impact of being first eligible to vote during a ‘conventional’ versus ‘unconventional’ period and political environment on voters' radical-right attitudes. The core idea is that young people who were just old enough to vote in the 2012 U.S. presidential election (i.e., age 18 by November 2012) experienced a fundamentally different initial political environment than those who were just too young. While the former ‘came of age’ politically during the 2012 election between Barack Obama and Mitt Romney, the latter were first eligible to vote in 2016, during the Trump era.
+This study uses a sharp RDD to identify the long-term causal impact of being first eligible to vote during a ‘conventional’ versus ‘unconventional’ period and political environment on voters' media attitudes. The core idea is that young people who were just old enough to vote in the 2012 U.S. presidential election (i.e., age 18 by November 2012) experienced a fundamentally different initial political environment than those who were just too young. While the former ‘came of age’ politically during the 2012 election between Barack Obama and Mitt Romney, the latter were first eligible to vote in 2016, during the Trump era.
 
-This design translates into a cutoff at age 26 in 2020 (the year for which data is used): respondents who were 26 or older in 2020 were just old enough to vote in 2012, while those under 26 were not. The assumption underlying the RDD is that, within a narrow bandwidth around this cutoff, the 'treatment' (being born after November 6, 2012) is as-good-as-randomly assigned. The local comparison around the threshold thus simulates an experiment where this 'treatment' is assigned by birth timing. For more details on the research design, including the specific regression formula and index construction, please refer to the [online appendix.](https://github.com/nikolaosvichos/Online-Appendix-Coming-of-Age-Under-Trump)
+This design translates into a cutoff at age 26 in 2020 (the year for which data is used): respondents who were 26 or older in 2020 were just old enough to vote in 2012, while those under 26 were not. The assumption underlying the RDD is that, within a narrow bandwidth around this cutoff, the 'treatment' (being born after November 6, 2012) is as-good-as-randomly assigned. The local comparison around the threshold thus simulates an experiment where this 'treatment' is assigned by birth timing.
+
+I estimate a flexible[^2] RDD, since linear models may miss non-linearities in how the outcome evolves with age, This can be expressed as:
+
+[^2]: Of course, this version can take a linear form; however, it is also generalizable to higher polynomial degrees.
+
+$$
+Y_i = \alpha + \tau D_i + f(X_i - c) + \varepsilon_i
+$$
+
+Where:
+
+-   $Y_i$: Outcome, measuring media attitudes
+-   $D_i$: Dummy indicator equal to 1 if individual $i$’s age *exceeds* the cutoff (i.e., *eligible* to vote in 2012), and 0 otherwise.[^3]
+-   $\tau$ : Parameter capturing the Local Average Treatment Effect.
+-   $X_i$: Running variable (age in 2020)
+-   $f(X_i - c)$: Flexible function (e.g., first- or higher-order polynomial) of the centered running variable—distance from the cutoff $c$.
+-   $c = 26$: Cut-off, so $X_i - c$ represents the running variable centered at the threshold.
+-   $\varepsilon_i$: Error term.
+
+[^3]: This might seem counter-intuitive, since the group of interest (young voters) becomes, in a sense, the 'control group'. This is due to the specific design of the R package used (rdrobust), which estimates causal effects when the running variable crosses the cut-off.
+
+For more details on the research design, including index construction, please refer to the [online ](https://github.com/nikolaosvichos/Online-Appendix-Coming-of-Age-Under-Trump)[appendix](https://github.com/nikolaosvichos/Media-and-Politics-Paper/tree/main/Appendix)[.](https://github.com/nikolaosvichos/Online-Appendix-Coming-of-Age-Under-Trump)
 
 ## Data and Index Construction
 
-The analysis draws on the 2020 American National Election Studies [@anes] cross-sectional survey, which offers a large, nationally representative sample and includes a relatively broad set of items on radical-right attitudes.
+The analysis draws on the 2020 American National Election Studies [@anes] cross-sectional survey. To capture media attitudes, I used factor analysis to construct a 0-1 index consisting of three items, presented in @tbl-items. Higher values indicate stronger support for liberal democratic protections of media freedom.
 
-To capture individual-level support for radical-right attitudes, I constructed three indices, using a total of 28 items: nativism (6), authoritarianism (9), populism (13). For each core feature, I first assessed the internal consistency of these items[^2], used factor analysis to extract a single latent factor and rescaled the factor scores to a 0–1 range, where higher values indicate stronger support for radical-right values.
++--------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Shortened Name                 | Survey Question                                                                                                                                             |
++================================+=============================================================================================================================================================+
+| Free Press\                    | First, how important is it that news organizations are free to criticize political leaders?\                                                                |
++--------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Concern for Media Undermining\ | How concerned are you that some people in the government today might want to undermine the news media’s ability to serve as a check on governmental power?\ |
++--------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Journalist Access              | Do you favor, oppose, or neither favor nor oppose elected officials restricting journalists’ access to information about government decision-making?        |
++--------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-[^2]: Even though the authoritarian and populist items each captured a coherent underlying construct (Cronbach’s α \> 0.7), the nativist items were just below the commonly accepted threshold, at 0.67, raising doubts about the internal consistency of the index and potentially explaining some of the irregularities in the results [@taber2018]
+: Media Freedom Attitudes Items and Survey Wording {#tbl-items}
 
 ## Analysis
 
-My analysis is organized around running separate regressions for different subgroups to test the three hypotheses:
+My analysis is organized around running separate regressions for different subgroups to test the three hypotheses (@tbl-subsets):
 
-+------------------------------+-------------------------------------------------------------------------------------------+
-| Hypothesis                   | Subgroup                                                                                  |
-+:============================:+:=========================================================================================:+
-| H1                           | Full dataset                                                                              |
-|                              |                                                                                           |
-| (first-time sensitivity)     |                                                                                           |
-+------------------------------+-------------------------------------------------------------------------------------------+
-| H2                           | Two sub-datasets: partisans (self-identified Democrats and Republicans), and independents |
-|                              |                                                                                           |
-| (non-partisan insensitivity) |                                                                                           |
-+------------------------------+-------------------------------------------------------------------------------------------+
-| H3                           | Two sub-datasets: Democrats and Republicans                                               |
-|                              |                                                                                           |
-| (asymmetric sensitivity)     |                                                                                           |
-+------------------------------+-------------------------------------------------------------------------------------------+
++-------------------------------+-------------------------------------------------------------------------------------------------------------+
+| Hypothesis                    | Subgroup                                                                                                    |
++:=============================:+:===========================================================================================================:+
+| H1                            | Full sample\                                                                                                |
+|                               |                                                                                                             |
+| (first-time sensitivity)\     |                                                                                                             |
++-------------------------------+-------------------------------------------------------------------------------------------------------------+
+| H2                            | Two subgroups: partisans (self-identified Democrats and Republicans), and independents (including leaners)\ |
+|                               |                                                                                                             |
+| (non-partisan insensitivity)\ |                                                                                                             |
++-------------------------------+-------------------------------------------------------------------------------------------------------------+
+| H3                            | Two subgroups: Democrats and Republicans                                                                    |
+|                               |                                                                                                             |
+| (asymmetric sensitivity)      |                                                                                                             |
++-------------------------------+-------------------------------------------------------------------------------------------------------------+
 
-: Specific sub-dataset used for each hypothesis
+: Specific sub-dataset used for each hypothesis {#tbl-subsets}
 
-I thus expect the causal effect to be stronger for (i) partisans than independents and (ii) Republicans than Democrats. For each subgroup and each index, I estimated two model specifications:
+I thus expect the causal effect to be stronger for (i) partisans than independents and (ii) Republicans than Democrats. For each subgroup and each index, I estimated two model specifications, shown in @tbl-models:
 
-|  Hypothesis   |                      Subgroup                       |
-|:-------------:|:---------------------------------------------------:|
-| Simple Model  |                     No controls                     |
-| Control Model | Gender, education, and income as control variables. |
++----------------+-----------------------------------------------------+
+| Hypothesis     | Subgroup                                            |
++:==============:+:===================================================:+
+| Simple Model\  | No controls\                                        |
++----------------+-----------------------------------------------------+
+| Control Model\ | Gender, education, and income as control variables. |
++----------------+-----------------------------------------------------+
 
-: Model specifications
+: Model specifications {#tbl-models}
 
 # Results
 
-This section presents the findings of this paper. I begin by providing some example-visualizations of the discontinuity near the 26-year-old threshold for the full sample and for the Republican subgroup.[^3] I then present the results, analyzing them by hypothesis.
-
-[^3]: The running variable (age) axis (horizontal) in these visualizations was narrowed down to an 18-60 years range (rather than the original 18-60 years) for a clearer depiction. Because of the high number of discontinuity visualizations (15) and their general lack of visual clarity, I only present the full sample and the Republican subgroup as examples. For all 15 visualizations, please refer to the [online appendix.](https://github.com/nikolaosvichos/Online-Appendix-Coming-of-Age-Under-Trump)
+This section presents the findings of this paper. I begin by visualizing the discontinuity near the 26-year-old threshold for the full sample and subgroups. I then present the results, analyzing them by hypothesis.
 
 ## Discontinuities
 
-@fig-discontinuityplot-full visualizes the discontinuity in at the threshold for the full-sample. Upon visual inspection, is no clear discontinuity for none of the three outcomes, and the overall clutter of the scatterplot makes it difficult to discern any patterns. Though there does appear to be a slight discontinuity in nativism, the confidence intervals (CIs) are largely overlapping.
+@fig-discontinuityplot-full visualizes the discontinuity around the threshold for the full-sample. Upon visual inspection, there is no clear discontinuity and the overall clutter makes it difficult to discern any patterns.
 
 ```{r}
 #| label: fig-discontinuityplot-full
@@ -807,14 +795,17 @@ This section presents the findings of this paper. I begin by providing some exam
 #| fig-cap: "Discontinuity in Media Attitudes at Age 26 (Full Sample, First Degree Polynomial)"
 #| fig-pos: H
 
-discontinuityplot_all
+discontinuityplot$plot_all
+
 
 ```
 
-@fig-discontinuityplot-republicans shows the discontinuity at the threshold for the Republican subgroup. In this case, there does appear to be a discontinuity in authoritarianism and populism attitudes when crossing the 26-year threshold (though CIs slightly overlap). Interestingly, it appears that crossing the threshold has a positive effect on support for these attitudes. This suggests an opposite effect to that predicted originally: 'coming of age' politically under Trump leads to lower support for authoritarianism and populism among Republicans.
+@fig-discontinuityplot-subgroups shows the discontinuity at the threshold for the subgroups. There appears to be a discontinuity in the Independents and Republicans subgroups, though CIs slightly overlap so no conclusions can be drawn from visual inspection. Interestingly, contrary to my predictions, 'coming of age' politically under Trump might have a positive effect[^4] on Republicans' media attitudes and a negative effect on independents.
+
+[^4]: A positive effect indicates an *increase* in support for liberal democratic protections of the media among those voting for the first time in *2016.*
 
 ```{r}
-#| label: fig-discontinuityplot-republicans
+#| label: fig-discontinuityplot-subgroups
 #| echo: false
 #| warning: false
 #| fig-width: 5.5
@@ -823,14 +814,14 @@ discontinuityplot_all
 #| fig-cap: "Discontinuity in Media Attitudes at Age 26 (Republican Subgroup, First Degree Polynomial)"
 #| fig-pos: H
 
-discontinuityplot_republicans
+discontinuityplot$plot_subgroups
 
 
 ```
 
 ## RDD Results
 
-The results are visualized in @fig-coefplot-results. The points represent the estimated causal effect at the cutoff, and the horizontal lines show the associated 95% CIs.
+Results are visualized in @fig-coefplot-results. The points represent the estimated causal effect at the cutoff, and the horizontal lines show the associated 95% CIs.
 
 ```{r}
 #| label: fig-coefplot-results
@@ -839,52 +830,56 @@ The results are visualized in @fig-coefplot-results. The points represent the es
 #| fig-width: 5
 #| fig-height: 5
 #| fig-align: center
-#| fig-cap: "Coefficient plot for Nativism showing estimated effects and confidence intervals."
+#| fig-cap: "Coefficient plot for Media Attitudes showing estimated effects and confidence intervals. A positive effect indicates an increase in support for liberal democratic protections of the media among those voting for the first time in 2016."
 #| fig-pos: H
 
 coefplot_media
 
 ```
 
-The results, summarized below, are quite perplexing.[^4] Across most-subgroups, results are statistically insignificant. The only exceptions are nativism for the full sample (only for the model without controls) and authoritarianism for the Republican and independent subgroups (only for the model without controls for among independents). Support for authoritarianism increased among independents; however there was no statistically signficant increase among partisans. The two other findings are even more surprising, however, suggesting the exact opposite from what predicted: both Republicans and the entire sample of respondents who voted for the first time in 2016 are *less* authoritarian or nativist.
+The results, summarized below, are quite perplexing.[^5] First, most results are statistically insignificant, indicating that 'coming of age' under Trump mostly has no long-term effects on media attitudes. The first notable exception is the strong and statistically significant negative effect (\~17%) on media attitudes among independents: this goes contrary to H2, which predicted that the negative effect would be greater among partisans. Even more surprisingly, there was a statistically significant strong positive effect (\~15%) among Republicans. This suggests the exact opposite from what I predicted: Republicans who 'came of age' under Trump are *more* supportive of liberal democratic protections of media freedom. Both exceptions are robust to the inclusion of controls. Results are summarized in @tbl-results
 
-[^4]: The direction of the results should be interpreted in accordance with the wording of the first-time sensitivity hypothesis: a positive effect means an increase in nativist, authoritarian, or populist attitudes among those who voted for the first time in 2016.
+[^5]: The direction of the results should be interpreted in accordance with the wording of the first-time sensitivity hypothesis: a positive effect indicates an increase in support for liberal democratic protections of the media among those voting for the first time in 2016
 
-    However, in reality, these results have been inverted. This is because of the rdrobust R package [@calonico2025]. In the package, the threshold is "crossed" from left to right—hence, normally, a positive effect would suggest an increase in nativist, authoritarian, or populist attitudes among those who voted for the first time in *2012.* However, for clearer comprehension, the results have been reversed, and the would indices indicate *decreasing* support for each of the three ideological features. For more details on index construction, please refer to the online appendix.
+    However, in reality, these results have been inverted. This is because of the rdrobust R package [@calonico2025]. In the package, the threshold is "crossed" from left to right—hence, normally, a positive effect would suggest an *increase* in support for liberal democratic norms toward media freedom among those who voted for the first time in *2012.* However, for clearer comprehension, the results have been reversed. For more details on index construction, please refer to the [online appendix.](https://github.com/nikolaosvichos/Media-and-Politics-Paper/tree/main/Appendix)
 
     Due to the perplexing nature of these results, I ran a number of 'rule-of-thumb' tests to confirm that the direction of the index is the intended one, such as checking if it is negatively or positively correlated with items used in its construction or other variables that we would expect to be correlated with the outcomes in a specific way (for example, higher education levels correlated with lower support for authoritarianism). These tests confirmed that the direction of the indices is the intended one.
 
-+-------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Hypothesis                    | Reject the Null?                                                                                                                                                                                                                                                    |
-+:=============================:+:===================================================================================================================================================================================================================================================================:+
-| H1                            | *No.* The only significant result is a negative effect in support for nativist attitudes, which contradicts H1's prediction. Additionally, the result is not robust to the inclusion of controls.\                                                                  |
-|                               |                                                                                                                                                                                                                                                                     |
-| (first-time sensitivity)\     |                                                                                                                                                                                                                                                                     |
-+-------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| H2                            | *No.* The only significant result is that independents who voted for the first time in 2016 were *more* authoritarian, which contradicts H2's prediction of a stronger effect among partisans. Additionally, the result is not robust to the inclusion of controls\ |
-|                               |                                                                                                                                                                                                                                                                     |
-| (non-partisan insensitivity)\ |                                                                                                                                                                                                                                                                     |
-+-------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| H3                            | *No.* The only significant result is that Republicans who voted for the first time in 2016 were *less* authoritarian, which contradicts H3's prediction, despite suggesting some sort of asymmetric insensitivity.                                                  |
-|                               |                                                                                                                                                                                                                                                                     |
-| (asymmetric sensitivity)      |                                                                                                                                                                                                                                                                     |
-+-------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
++-----------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Hypothesis                                          | Reject the Null?                                                                                                                                                       |
++:===================================================:+:======================================================================================================================================================================:+
+| H1                                                  | **No.** The negative effect on media attitudes is statistically insignificant\                                                                                         |
+|                                                     |                                                                                                                                                                        |
+| (first-time sensitivity)\                           |                                                                                                                                                                        |
++-----------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| H2                                                  | **No.** The negative effect among independents is statistically significant, whereas there is no such effect among partisans.\                                         |
+|                                                     |                                                                                                                                                                        |
+| (non-partisan insensitivity)\                       |                                                                                                                                                                        |
++-----------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| H3                                                  | **No.** The only significant result is that the *positive* attitude among. This contradicts H3's prediction, despite suggesting some sort of asymmetric insensitivity. |
+|                                                     |                                                                                                                                                                        |
+| (asymmetric sensitivity)                            |                                                                                                                                                                        |
++-----------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-: Summary of RD results
+: Summary of RD results {#tbl-results}
 
 # Conclusion and Discussion
 
-This paper set out to examine whether the timing of democratic initiation—specifically, becoming a first-time voter during the 2016 U.S. presidential election—shapes long-term support for radical-right attitudes. Drawing on theories of political socialization, elite cue-taking, and asymmetric partisan sensitivity, I tested whether 'coming of age' politically in a moment of nativist, authoritarian, and populist elite rhetoric would leave a measurable imprint on voter attitudes.
+This paper set out to examine whether the timing of democratic initiation—specifically, becoming eligible to vote during the 2016 U.S. presidential election—shapes long-term media attitudes. Drawing on theories of political socialization, elite cue-taking, and asymmetric partisan sensitivity, I tested whether 'coming of age' politically in a moment of hostile elite rhetoric toward the media would leave a measurable imprint on voter attitudes.
 
-The findings are perplexingly counter-intuitive. First, independents voting for the first time in 2016 indicated *stronger* support for authoritarianism than partisans, contradicting existing work suggesting that independents are less sensitive to their political context. Even more surprisingly, 'coming of age' during the norm-questioning 2016 election led to *weaker* long-term support for radical-right attitudes (nativism and authoritarianism) among Republicans and the entire sample of respondents. This pattern is especially pronounced among Republicans, suggesting a partisan asymmetry, albeit one in the reverse direction of what was hypothesized. Rather than strengthening support for radical-right attitudes, the experience of 2016 appears to have either had no effect or to have even weakened support among some groups. These findings have important implications on our understanding of political socialization and the stickiness and adoption of elite cues. At first, they might suggest that first-time voters are resistant to the trickle-down adoption of radical-right attitudes; in fact, they might even turn against them even more strongly.
+The findings are counter-intuitive. First, independents voting for the first time in 2016 indicated more *negative* media attitudes than partisans, contradicting existing work suggesting that independents are *less* sensitive to their political context [@magleby2011]. Even more surprisingly, 'coming of age' during the 2016 election led to *greater* long-term support for liberal democratic protections of media freedom among Republicans. This suggests a partisan asymmetry, albeit one in the reverse direction of what I hypothesized.
 
-However, given the broader context of existing literature, these counter-intuitive findings might also admit at least two darker interpretations. First, as @graham2020 argue, ordinary citizens often express broad opposition to (often undemocratic or illiberal) radical-right attitudes when asked in the abstract, but this support may evaporate when those principles conflict with partisan interests. Because the ANES items used here were not embedded in a tradeoff or priming design, they likely captured only nominal or superficial attitudes. A second possibility, again drawing from @graham2020, is that some Trump supporters may genuinely reject his radical-right rhetoric, yet continue to support him on policy grounds, thus generating a form of 'retrospective backlash': weaker radical-right attitudes despite (or, in the case of the retrospective backlash, because of) exposure to such cues. In either case, the implications are troubling. Whether due to shallow commitments or conditional tolerance, these findings underscore a fragility in the public’s attachment to liberal democracy that that may not withstand more explicit norm violation.
+These findings have important implications on our understanding of political socialization and the stickiness of elite cues. At first, they suggest that first-time voters are resistant to the trickle-down adoption of negative media attitudes, pointing to a backlash effect where exposure to norm-questioning elite cues reinforces these norms among the public. Additionally, the presence of a negative effect among independents and a positive effect among Republicans (respectively, the least and most sensitive citizens to their political context, according to @mandel2014) hints that political involvement might be an important predictor of whether this backlash takes place. Hence, increasing citizens' engagement with politics could be an antidote against democratic backsliding.
 
-That said, several limitations temper the interpretation of these results. Most notably, while some effects are statistically significant and robust across subsamples, they weaken under alternative model specifications, namely the addition of covariates controlling for demographic characteristics. Additionally, the assignment variable used to define voting eligibility (age in years ) is a blunt proxy that fails to capture exact birthdates, introducing measurement error near the cutoff. Furthermore, the limited internal consistency of the nativist items (see appendix) further constrains the robustness of these findings. Finally, this study truly examines medium- rather than long- effects, as it studies attitudes only four years later than the first exposure in 2016.
+However, given the broader context of existing literature, these counter-intuitive findings also admit three darker interpretations. First, as @graham2020 argue, ordinary citizens often express broad opposition to illiberal or undemocratic attitudes when asked in the abstract, but this support may evaporate when those principles conflict with partisan interests. Because the ANES items used here were not embedded in a trade-off or priming design, they likely captured only nominal or superficial attitudes. Some Republicans might thus have voted for Trump not because of his hostile rhetoric toward the media but in spite of it: they might reject his rhetoric, yet continue to support him on policy grounds. A second possibility is one of anticipatory support for liberal democratic norms. Drawing from @kingzette2021, in affectively polarized contexts partisans whose party is in power often turn against liberal democratic norms whereas those in opposition seek to uphold them, recognizing them as vital for their political survival. Given Biden's consistent lead in the polls [@pewresearchcenter2020], Republicans might have begun preparing for a scenario where they would find themselves in opposition by preemptively increasing their support for liberal democratic protections. In both scenarios, those who were first eligible in 2016 might have been more likely to accept these anti-democratic trade-offs due to having been socialized in a norm-questioning environment that normalized such attitudes.
 
-Future work could address these gaps in several ways. First, researchers should replicate this design using datasets that include exact birthdates, improving causal precision near the eligibility threshold. Second, using more recent data (such as the 2024 ANES) could allow for studying longer-term trends exploring different cohorts and political cycles would help determine whether early exposure to far-right elite cues produces lasting attitudinal change, or whether its effects fade over time. Third, this study assumed that the voting eligibility itself is enough to trigger this political 'coming of age.' However, this also includes a sizeable proportion of young adults who were eligible to vote but chose not to. Future research could instead examine the effect of first-time *voting*, through a fuzzy RDD design that uses eligibility as the instrumental variable. Finally, applying the same logic to other political transitions, like Bolsonaro’s election or the AfD's stronger results in Germany since 2017, could reveal whether these dynamics are context-dependent or broadly generalizable.
+However, these explanations do not account for the strong negative effect among independents, who presumably are the least likely to make such a trade-off [@graham2020]. A final, albeit imperfect, explanation concerns differences in media consumption and the accidental and asymmetrical priming effects of the survey wording. Partisans increasingly follow like-minded sources [@peterson2021]; as a result, when responding to the survey, Republicans—especially those who 'came of age' in 2016—might have been accidentally primed into 'safeguarding' only conservative media, which were also heavily praised by Trump in his campaign [@meeks2020]. Independents, on the other hand, might have been primed to think about the polarized media environment that characterized both the 2016 and 2020 electoral races. If this priming provokes a negative reaction [@arceneaux2015], they might turn increasingly hostile to the media as a whole and, by extension, the liberal democratic norms protecting them. This effect might be more pronounced among those who were first eligible to vote in 2016 not because of a greater hostility toward the media environment but because of a greater willingness to translate this hostility into negative media attitudes, as a result of being socialized in a norm-violating context.
 
-In sum, while these findings complicate our assumptions about the downstream effects of the adoption of radical-right attitudes, they might ultimately be reinforcing its most worrying implication: the resilience of liberal democracy cannot be taken for granted, not even among its newest members.
+That said, several limitations temper the interpretation of these results. Most notably, not only is the sample size for each subgroup quite small but, while effects are robust to the addition of controls, they sometimes lose their significance under alternative polynomial degree or bandwidth specifications (see [online appendix](https://github.com/nikolaosvichos/Media-and-Politics-Paper/tree/main/Appendix) for robustness checks). Additionally, the assignment variable used to define voting eligibility (age in years) is a blunt proxy that fails to capture exact birthdates, introducing measurement error near the cutoff. Finally, this paper truly examines medium- rather than long-term effects, as it studies attitudes only four years later than the first exposure in 2016.
+
+Future work could address these gaps in several ways. Researchers should replicate this design using datasets that include exact birthdates, improving causal precision near the eligibility threshold. Additionally, using more recent data (e.g., 2024 ANES) could allow for studying longer-term trends and help determine whether early exposure to hostile elite cues produces lasting attitudinal change. Third, this study assumed that the voting eligibility itself is enough to trigger this political 'coming of age.' However, this also includes a sizeable proportion of young adults who were eligible to vote but chose not to. Future research could instead examine the effect of first-time *voting*, through a fuzzy RDD design that uses eligibility as the instrumental variable. Finally, applying the same logic to other political transitions, like Bolsonaro’s 2018 election or the AfD's third-place finish in Germany in 2017, could reveal whether these dynamics are context-dependent or broadly generalizable.
+
+In sum, while these findings complicate our assumptions about the development of attitudes toward liberal democratic institutions, they might ultimately be reinforcing its most worrying implication: the resilience of liberal democracy cannot be taken for granted, not even among its newest members.
 
 {{< pagebreak >}}
 
@@ -897,6 +892,6 @@ In sum, while these findings complicate our assumptions about the downstream eff
 
 # Appendix
 
-For additional materials, such as details on the RDD design and index construction, the specific items used for the construction of the indices, and additional visualizations, please refer to the [online appendix.](https://github.com/nikolaosvichos/Online-Appendix-Coming-of-Age-Under-Trump)
+For additional materials, such as details on the RDD design and index construction, the specific items used for the construction of the indices, and additional visualizations, please refer to the [online appendix.](https://github.com/nikolaosvichos/Media-and-Politics-Paper/tree/main/Appendix)
 
-Link (in case hyperlink breaks): <https://github.com/nikolaosvichos/Online-Appendix-Coming-of-Age-Under-Trump>
+Link (in case hyperlink breaks): <https://github.com/nikolaosvichos/Media-and-Politics-Paper/tree/main/Appendix>
